@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教练端 — Weight Harness</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, 'PingFang SC', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #f59e0b, #d97706); padding: 20px; display: flex; align-items: center; gap: 12px; }
+        .header a { color: #fff; text-decoration: none; font-size: 20px; }
+        .header h1 { font-size: 20px; }
+        .container { max-width: 800px; margin: 0 auto; padding: 24px; }
+        .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+        .card h2 { font-size: 18px; margin-bottom: 16px; color: #f59e0b; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 14px; color: #888; margin-bottom: 6px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05); color: #fff; font-size: 15px;
+        }
+        .btn { padding: 12px 32px; border-radius: 8px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; color: #fff; background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .btn:hover { opacity: 0.9; }
+        .student-list { list-style: none; }
+        .student-item { display: flex; justify-content: space-between; align-items: center; padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .student-item .name { font-weight: 600; }
+        .student-item .meta { font-size: 13px; color: #888; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-ok { background: rgba(16,185,129,0.2); color: #10b981; }
+        .badge-warn { background: rgba(245,158,11,0.2); color: #f59e0b; }
+        .badge-danger { background: rgba(239,68,68,0.2); color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/">←</a>
+        <h1>🧠 教练端 — 编排器</h1>
+    </div>
+    <div class="container">
+        <!-- 学员概览 -->
+        <div class="card">
+            <h2>学员概览</h2>
+            <ul class="student-list">
+                <li class="student-item">
+                    <div>
+                        <div class="name">示例学员</div>
+                        <div class="meta">48kg → 42kg | 剩余45天 | 跆拳道</div>
+                    </div>
+                    <span class="badge badge-ok">正常</span>
+                </li>
+            </ul>
+            <p style="color:#666; font-size:13px; margin-top:12px; text-align:center;">添加学员后将在此显示</p>
+        </div>
+
+        <!-- 添加学员 -->
+        <div class="card">
+            <h2>添加学员</h2>
+            <div class="form-group">
+                <label>姓名</label>
+                <input type="text" placeholder="学员姓名">
+            </div>
+            <div class="form-group">
+                <label>年龄</label>
+                <input type="number" placeholder="岁">
+            </div>
+            <div class="form-group">
+                <label>参赛项目</label>
+                <select>
+                    <option>跆拳道</option>
+                    <option>拳击</option>
+                    <option>摔跤</option>
+                    <option>举重</option>
+                    <option>柔道</option>
+                    <option>其他</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>当前体重 (kg)</label>
+                <input type="number" step="0.1" placeholder="48.0">
+            </div>
+            <div class="form-group">
+                <label>目标体重 (kg)</label>
+                <input type="number" step="0.1" placeholder="42.0">
+            </div>
+            <div class="form-group">
+                <label>比赛日期</label>
+                <input type="date">
+            </div>
+            <button class="btn">添加学员并生成计划</button>
+        </div>
+
+        <!-- 计划制定 -->
+        <div class="card">
+            <h2>训练与饮食模板</h2>
+            <div class="form-group">
+                <label>每日训练计划</label>
+                <textarea rows="4" placeholder="例：晨跑5km + 专项训练2h + 力量训练30min"></textarea>
+            </div>
+            <div class="form-group">
+                <label>每日饮食方案</label>
+                <textarea rows="4" placeholder="例：早餐-鸡蛋2个+全麦面包 | 午餐-鸡胸肉+蔬菜 | 晚餐-少量碳水+蛋白质"></textarea>
+            </div>
+            <div class="form-group">
+                <label>注意事项</label>
+                <textarea rows="3" placeholder="例：禁止赛前48小时内过度脱水"></textarea>
+            </div>
+            <button class="btn">保存计划模板</button>
+        </div>
+    </div>
+</body>
+</html>
