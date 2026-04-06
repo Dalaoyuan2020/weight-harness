@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家长端 — Weight Harness</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, 'PingFang SC', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #10b981, #059669); padding: 20px; display: flex; align-items: center; gap: 12px; }
+        .header a { color: #fff; text-decoration: none; font-size: 20px; }
+        .header h1 { font-size: 20px; }
+        .container { max-width: 600px; margin: 0 auto; padding: 24px; }
+        .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+        .card h2 { font-size: 18px; margin-bottom: 16px; color: #10b981; }
+
+        /* 状态概览 */
+        .overview {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
+        }
+        .overview-item {
+            background: rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; text-align: center;
+        }
+        .overview-item .value { font-size: 28px; font-weight: 800; }
+        .overview-item .label { font-size: 12px; color: #888; margin-top: 4px; }
+        .green { color: #10b981; }
+        .yellow { color: #f59e0b; }
+        .red { color: #ef4444; }
+
+        /* 体重曲线占位 */
+        .chart-placeholder {
+            background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.1);
+            border-radius: 12px; height: 200px; display: flex; align-items: center; justify-content: center;
+            color: #444; font-size: 14px;
+        }
+
+        /* 今日执行情况 */
+        .progress-bar-bg {
+            width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; margin: 8px 0;
+        }
+        .progress-bar-fill {
+            height: 100%; border-radius: 6px; background: linear-gradient(90deg, #10b981, #059669);
+            transition: width 0.5s;
+        }
+
+        .checkin-status { display: flex; align-items: center; gap: 8px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .dot-done { background: #10b981; }
+        .dot-pending { background: #444; }
+        .checkin-text { font-size: 14px; }
+        .checkin-time { font-size: 12px; color: #666; margin-left: auto; }
+
+        /* 鼓励 */
+        .encourage {
+            background: rgba(16,185,129,0.1); border-radius: 12px; padding: 20px; text-align: center;
+            font-size: 15px; line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="index.html">←</a>
+        <h1>👁️ 家长端 — 评估器</h1>
+    </div>
+    <div class="container">
+        <!-- 状态概览 -->
+        <div class="overview">
+            <div class="overview-item">
+                <div class="value green">48.0</div>
+                <div class="label">今日体重(kg)</div>
+            </div>
+            <div class="overview-item">
+                <div class="value yellow">45天</div>
+                <div class="label">距离比赛</div>
+            </div>
+            <div class="overview-item">
+                <div class="value">-0.0</div>
+                <div class="label">较昨日(kg)</div>
+            </div>
+            <div class="overview-item">
+                <div class="value">6.0</div>
+                <div class="label">还需减(kg)</div>
+            </div>
+        </div>
+
+        <!-- 体重趋势 -->
+        <div class="card">
+            <h2>📈 体重趋势</h2>
+            <div class="chart-placeholder">
+                体重曲线图（接入数据后显示）
+            </div>
+        </div>
+
+        <!-- 今日执行情况 -->
+        <div class="card">
+            <h2>✅ 今日执行情况</h2>
+            <p style="font-size:14px; color:#888; margin-bottom:8px;">完成 0/7 项</p>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: 0%;"></div>
+            </div>
+
+            <div class="checkin-status">
+                <span class="dot dot-pending"></span>
+                <span class="checkin-text">晨跑 5km</span>
+                <span class="checkin-time">待完成</span>
+            </div>
+            <div class="checkin-status">
+                <span class="dot dot-pending"></span>
+                <span class="checkin-text">早餐打卡</span>
+                <span class="checkin-time">待完成</span>
+            </div>
+            <div class="checkin-status">
+                <span class="dot dot-pending"></span>
+                <span class="checkin-text">专项训练</span>
+                <span class="checkin-time">待完成</span>
+            </div>
+            <div class="checkin-status">
+                <span class="dot dot-pending"></span>
+                <span class="checkin-text">午餐打卡</span>
+                <span class="checkin-time">待完成</span>
+            </div>
+            <div class="checkin-status">
+                <span class="dot dot-pending"></span>
+                <span class="checkin-text">力量训练</span>
+                <span class="checkin-time">待完成</span>
+            </div>
+            <div class="checkin-status">
+                <span class="dot dot-pending"></span>
+                <span class="checkin-text">晚餐打卡</span>
+                <span class="checkin-time">待完成</span>
+            </div>
+            <div class="checkin-status">
+                <span class="dot dot-pending"></span>
+                <span class="checkin-text">睡前体重</span>
+                <span class="checkin-time">待完成</span>
+            </div>
+        </div>
+
+        <!-- 鼓励 -->
+        <div class="card">
+            <div class="encourage">
+                💚 孩子正在努力中<br>
+                您的关注是他最大的动力<br>
+                每一次打卡都值得一个鼓励
+            </div>
+        </div>
+    </div>
+</body>
+</html>
