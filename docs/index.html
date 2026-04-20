@@ -1,216 +1,1811 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weight Harness — 三方制衡降重系统</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; }
+<meta charset="UTF-8">
+<title>Weight Harness · 三方协同的科学减重系统</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* ============================================
+   Weight Harness — Shared design tokens & layout
+   Apple HIG / Developer style · 纯黑白灰
+   ============================================ */
 
-        /* 首页封面 */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 70%);
-        }
+:root {
+  --bg: #ffffff;
+  --surface: #fbfbfd;
+  --surface-2: #f5f5f7;
+  --surface-3: #eeeef1;
+  --line: #d2d2d7;
+  --line-soft: #e8e8ed;
+  --line-faint: #f0f0f3;
+  --ink: #1d1d1f;
+  --ink-2: #424245;
+  --muted: #86868b;
+  --faint: #aeaeb2;
+  --accent: #1d1d1f;
 
-        .logo { font-size: 64px; margin-bottom: 10px; }
-        .title { font-size: 42px; font-weight: 800; letter-spacing: 8px; margin-bottom: 8px; }
-        .subtitle { font-size: 18px; color: #888; margin-bottom: 60px; letter-spacing: 2px; }
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 22px;
 
-        /* 三角制衡图 */
-        .triangle-container {
-            position: relative;
-            width: 400px;
-            height: 380px;
-            margin-bottom: 50px;
-        }
+  --max: 1360px;
+  --pad: 32px;
 
-        .role-node {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: #fff;
-        }
-        .role-node:hover { transform: scale(1.12); }
-        .role-node .icon { font-size: 36px; margin-bottom: 6px; }
-        .role-node .label { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro SC", "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif;
+  --font-mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+}
 
-        /* 教练 - 顶部 */
-        .coach {
-            top: 0; left: 50%; transform: translateX(-50%);
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            box-shadow: 0 0 30px rgba(245,158,11,0.3);
-        }
-        /* 学生 - 左下 */
-        .student {
-            bottom: 0; left: 20px;
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            box-shadow: 0 0 30px rgba(59,130,246,0.3);
-        }
-        /* 家长 - 右下 */
-        .parent {
-            bottom: 0; right: 20px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            box-shadow: 0 0 30px rgba(16,185,129,0.3);
-        }
+html[data-theme="dark"] {
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface-2: #141416;
+  --surface-3: #1c1c1e;
+  --line: #2a2a2e;
+  --line-soft: #1c1c1e;
+  --line-faint: #141416;
+  --ink: #f5f5f7;
+  --ink-2: #c7c7cc;
+  --muted: #86868b;
+  --faint: #48484a;
+  --accent: #f5f5f7;
+}
 
-        /* 连接线 */
-        .triangle-lines {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-        }
-        .triangle-lines svg { width: 100%; height: 100%; }
-        .triangle-lines line {
-            stroke: rgba(255,255,255,0.15);
-            stroke-width: 2;
-            stroke-dasharray: 8 4;
-        }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "tnum" on, "kern" on, "ss01" on;
+  letter-spacing: -0.005em;
+  line-height: 1.5;
+}
 
-        /* 连接线标签 */
-        .link-label {
-            position: absolute;
-            font-size: 11px;
-            color: #666;
-            white-space: nowrap;
-        }
-        .link-coach-student { top: 55%; left: 8%; }
-        .link-coach-parent { top: 55%; right: 8%; }
-        .link-student-parent { bottom: 25px; left: 50%; transform: translateX(-50%); }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
 
-        /* 核心理念 */
-        .principles {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 50px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .principle {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 24px;
-            width: 260px;
-            text-align: center;
-        }
-        .principle h3 { font-size: 16px; margin-bottom: 8px; }
-        .principle p { font-size: 13px; color: #888; line-height: 1.6; }
+.mono { font-family: var(--font-mono); }
 
-        /* 入口按钮 */
-        .entries {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .entry-btn {
-            padding: 16px 40px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            text-decoration: none;
-            color: #fff;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-        }
-        .entry-btn:hover { transform: translateY(-3px); }
-        .btn-coach { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .btn-student { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-        .btn-parent { background: linear-gradient(135deg, #10b981, #059669); }
+/* ---- Top navigation ---- */
+.nav {
+  position: sticky; top: 0; z-index: 80;
+  background: color-mix(in oklab, var(--bg) 78%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line-soft);
+}
+.nav-inner {
+  max-width: var(--max); margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px var(--pad); gap: 24px;
+  height: 56px;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 600; font-size: 15px; letter-spacing: -0.01em;
+}
+.nav-brand .brand-mark {
+  width: 22px; height: 22px; border-radius: 6px;
+  border: 1.5px solid var(--ink);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.nav-brand .brand-mark svg { width: 14px; height: 14px; stroke: var(--ink); fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.nav-brand .brand-tag {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--muted); letter-spacing: 0.06em;
+  margin-left: 2px;
+}
+.nav-links {
+  display: flex; gap: 28px;
+  font-size: 13px; color: var(--ink-2);
+}
+.nav-links a {
+  position: relative; padding: 6px 0;
+  transition: color 0.15s ease;
+}
+.nav-links a.active { color: var(--ink); }
+.nav-links a.active::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -14px;
+  height: 1px; background: var(--ink);
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-right {
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--muted);
+}
+.nav-right .kbd {
+  border: 1px solid var(--line); padding: 3px 8px; border-radius: 5px;
+  background: var(--surface); color: var(--ink-2);
+}
 
-        .footer {
-            margin-top: 60px;
-            font-size: 12px;
-            color: #444;
-            text-align: center;
-        }
-    </style>
+/* ---- Common page helpers ---- */
+.container { max-width: var(--max); margin: 0 auto; padding: 0 var(--pad); }
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600; letter-spacing: -0.022em;
+  margin: 0;
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 11px 20px; border-radius: 999px;
+  border: 1px solid var(--ink); background: transparent;
+  color: var(--ink); font-size: 14px;
+  cursor: pointer; transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--ink); color: var(--bg); }
+.btn.primary { background: var(--ink); color: var(--bg); }
+.btn.primary:hover { background: var(--ink-2); border-color: var(--ink-2); }
+.btn.ghost { border-color: var(--line); color: var(--muted); }
+.btn.ghost:hover { background: transparent; color: var(--ink); border-color: var(--ink); }
+
+/* ---- Icon frame ---- */
+.iframe-ic {
+  width: 28px; height: 28px; border: 1px solid var(--line);
+  border-radius: 7px; display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.iframe-ic.sm { width: 22px; height: 22px; border-radius: 5px; }
+.iframe-ic.lg { width: 44px; height: 44px; border-radius: 11px; }
+.iframe-ic svg {
+  width: 60%; height: 60%;
+  stroke: var(--ink); fill: none;
+  stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* ---- Page-scope chip / segmented ---- */
+.seg {
+  display: inline-flex; padding: 3px; border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted); background: var(--bg);
+}
+.seg span { padding: 5px 11px; border-radius: 6px; cursor: pointer; }
+.seg span.on { background: var(--ink); color: var(--bg); }
+
+/* ---- KPI card ---- */
+.kpi-row { display: grid; gap: 12px; }
+.kpi {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 6px;
+  background: var(--bg);
+}
+.kpi .k-lbl {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+}
+.kpi .k-val { font-size: 28px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; }
+.kpi .k-val small { font-size: 14px; color: var(--muted); font-weight: 400; margin-left: 2px; }
+.kpi .k-delta { font-size: 11.5px; color: var(--muted); }
+
+/* ---- List row ---- */
+.lrow {
+  display: grid; grid-template-columns: 22px 1fr auto auto;
+  gap: 14px; padding: 14px 4px;
+  border-bottom: 1px solid var(--line-soft);
+  align-items: center;
+}
+.lrow:last-child { border-bottom: none; }
+.check {
+  width: 18px; height: 18px; border: 1.5px solid var(--line); border-radius: 5px;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.check.done { background: var(--ink); border-color: var(--ink); }
+.check.done::after {
+  content: ""; width: 9px; height: 5px;
+  border-left: 1.5px solid var(--bg); border-bottom: 1.5px solid var(--bg);
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+.lrow .label { font-size: 13.5px; }
+.lrow .label.muted { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--faint); }
+.lrow .meta { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+.chipette {
+  font-size: 10px; border: 1px solid var(--line); padding: 3px 9px;
+  border-radius: 999px; color: var(--muted);
+  font-family: var(--font-mono); letter-spacing: 0.04em;
+}
+
+/* ---- Section headers ---- */
+.section {
+  padding: 96px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.section-head { margin-bottom: 40px; max-width: 760px; }
+.section-head h2 {
+  font-size: 36px; line-height: 1.15;
+  margin-top: 14px;
+}
+.section-head p {
+  margin: 16px 0 0; color: var(--ink-2); font-size: 15.5px; max-width: 72ch;
+  text-wrap: pretty;
+}
+
+/* ---- Panel card ---- */
+.panel {
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: var(--bg);
+  overflow: hidden;
+}
+.panel-head {
+  padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--line-soft);
+}
+.panel-head .eyebrow { margin: 0; }
+.panel-head .title { font-size: 15px; font-weight: 600; }
+.panel-body { padding: 20px; }
+
+/* ---- Footer ---- */
+.footer {
+  border-top: 1px solid var(--line-soft);
+  padding: 48px var(--pad);
+  margin-top: 40px;
+  font-size: 12px; color: var(--muted);
+  font-family: var(--font-mono); letter-spacing: 0.02em;
+}
+.footer-inner {
+  max-width: var(--max); margin: 0 auto;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+}
+.footer-cols { display: flex; gap: 48px; }
+.footer-cols > div { display: flex; flex-direction: column; gap: 6px; }
+.footer-cols h5 { font-size: 10px; color: var(--ink); letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 6px; }
+.footer-cols a:hover { color: var(--ink); }
+
+/* ---- Tweaks panel ---- */
+.tweaks-panel {
+  position: fixed; right: 20px; bottom: 20px; z-index: 200;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 16px; min-width: 220px;
+  display: none; flex-direction: column; gap: 12px;
+  font-size: 12px; color: var(--ink);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+}
+.tweaks-panel.on { display: flex; }
+.tweaks-panel h4 {
+  margin: 0; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); font-family: var(--font-mono);
+}
+.tweak-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.seg-toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; padding: 2px; }
+.seg-toggle button {
+  background: transparent; border: none; padding: 5px 11px;
+  color: var(--muted); font-size: 11px; border-radius: 5px; cursor: pointer;
+  font-family: var(--font-mono);
+}
+.seg-toggle button.on { background: var(--ink); color: var(--bg); }
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .section { padding: 64px 0; }
+  :root { --pad: 20px; }
+}
+
+</style>
+<style>
+/* ============================================
+   Triangle diagram — animated
+   ============================================ */
+.triangle-wrap {
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 0;
+  cursor: pointer;
+}
+.triangle-wrap svg {
+  width: 100%; max-width: 680px; height: auto;
+  overflow: visible;
+}
+
+.tri-edge {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+}
+
+.tri-arrow {
+  fill: var(--ink);
+  opacity: 0;
+  transition: opacity 0.6s ease 0.3s;
+}
+.tri-rest .tri-arrow { opacity: 1; }
+
+.tri-node {
+  fill: var(--bg);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  transform-origin: center;
+  transition: opacity 0.55s cubic-bezier(.2,.7,.2,1), transform 0.55s cubic-bezier(.2,.7,.2,1);
+}
+.tri-node-hidden { opacity: 0; transform: scale(0.6); }
+
+.tri-node-glyph {
+  stroke: var(--ink); fill: none;
+  stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+  transition: opacity 0.55s ease;
+}
+.tri-node-hidden + .tri-node-glyph { opacity: 0; }
+
+.tri-label, .tri-node-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--muted);
+  letter-spacing: 0.08em;
+  transition: opacity 0.4s ease, fill 0.25s ease;
+}
+.tri-label-hidden { opacity: 0; }
+
+.tri-label.tri-label-hot {
+  fill: var(--ink);
+  font-weight: 600;
+}
+
+.tri-node-name {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  fill: var(--ink);
+  letter-spacing: -0.01em;
+  transition: opacity 0.4s ease;
+}
+
+.tri-pulse {
+  fill: var(--ink);
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--ink) 40%, transparent));
+}
+
+.tri-center-label {
+  font-family: var(--font-mono); font-size: 10px;
+  fill: var(--muted); letter-spacing: 0.14em; text-transform: uppercase;
+}
+.tri-center-title {
+  font-family: var(--font-display); font-size: 13px;
+  fill: var(--ink); font-weight: 600;
+}
+
+/* Replay hint */
+.triangle-wrap::after {
+  content: "";
+  display: block;
+}
+.tri-replay {
+  position: absolute; right: 16px; top: 16px;
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--muted); opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  letter-spacing: 0.1em;
+}
+.tri-rest .tri-replay { opacity: 0.7; }
+.tri-section { position: relative; }
+
+</style>
+<style>
+  /* -------- Index-specific -------- */
+  .hero { padding: 72px 0 40px; }
+  .hero .eyebrow { margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .hero .eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--ink); animation: blink 2.4s ease-in-out infinite; }
+  @keyframes blink { 0%, 100% { opacity: 1 } 50% { opacity: 0.3 } }
+
+  .hero h1 {
+    font-size: clamp(48px, 6vw, 84px);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    margin-bottom: 28px;
+    max-width: 16ch;
+  }
+  .hero-sub {
+    font-size: 19px; color: var(--ink-2); line-height: 1.55;
+    max-width: 58ch; margin: 0 0 40px;
+  }
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 56px; }
+  .hero-cta .note { font-size: 12px; color: var(--muted); font-family: var(--font-mono); margin-left: 6px; }
+
+  .concepts {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--line); border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .concept {
+    padding: 24px 24px 22px;
+    border-right: 1px solid var(--line-soft);
+    display: flex; flex-direction: column; gap: 10px;
+    min-height: 180px;
+    transition: background 0.2s ease;
+  }
+  .concept:last-child { border-right: none; }
+  .concept:hover { background: var(--surface); }
+  .concept-head {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .concept .role-num {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--muted); letter-spacing: 0.1em;
+  }
+  .concept h3 {
+    font-size: 22px; font-weight: 600; letter-spacing: -0.015em;
+    margin: 6px 0 2px;
+  }
+  .concept p {
+    font-size: 13px; color: var(--ink-2); line-height: 1.55;
+    margin: 0;
+  }
+  .concept-link {
+    margin-top: auto;
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--ink); letter-spacing: 0.05em;
+  }
+  .concept-link svg { width: 14px; height: 14px; transition: transform 0.2s ease; }
+  .concept:hover .concept-link svg { transform: translateX(3px); }
+  @media (max-width: 900px) { .concepts { grid-template-columns: 1fr; } .concept { border-right: none; border-bottom: 1px solid var(--line-soft); } }
+
+  /* -------- Triangle section -------- */
+  .tri-section { background: var(--surface-2); }
+  .tri-layout {
+    display: grid; grid-template-columns: 1fr 1.15fr; gap: 72px; align-items: center;
+  }
+  .tri-layout .copy h2 { font-size: 42px; line-height: 1.1; }
+  .tri-layout .copy p { color: var(--ink-2); font-size: 15.5px; max-width: 42ch; margin-top: 18px; line-height: 1.6; }
+  .tri-principles {
+    margin-top: 32px; padding-top: 24px;
+    border-top: 1px solid var(--line);
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .tri-principle {
+    display: grid; grid-template-columns: 60px 1fr; gap: 14px;
+    font-size: 13px; line-height: 1.5;
+  }
+  .tri-principle .num {
+    font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  .tri-principle b { font-weight: 600; color: var(--ink); display: block; margin-bottom: 4px; }
+  .tri-principle span { color: var(--ink-2); }
+  @media (max-width: 900px) { .tri-layout { grid-template-columns: 1fr; gap: 40px; } }
+
+  /* -------- Metrics strip -------- */
+  .metrics {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--line); border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .metric {
+    padding: 26px 24px;
+    border-right: 1px solid var(--line-soft);
+  }
+  .metric:last-child { border-right: none; }
+  .metric .label {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .metric .value {
+    font-size: 42px; font-weight: 600;
+    letter-spacing: -0.03em; line-height: 1.05;
+    margin: 8px 0 4px;
+  }
+  .metric .value small { font-size: 16px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+  .metric .caption { font-size: 12px; color: var(--ink-2); }
+  @media (max-width: 900px) { .metrics { grid-template-columns: repeat(2, 1fr); } .metric { border-bottom: 1px solid var(--line-soft); } }
+
+  /* -------- How it works (ordered narrative) -------- */
+  .flow-rows { display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--line); }
+  .flow-row {
+    display: grid; grid-template-columns: 80px 1fr 1.2fr;
+    gap: 40px; padding: 28px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+  .flow-row .step {
+    font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+    letter-spacing: 0.12em;
+  }
+  .flow-row h3 {
+    font-size: 24px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px;
+  }
+  .flow-row .txt { color: var(--ink-2); font-size: 14px; line-height: 1.6; max-width: 40ch; }
+  .flow-row .detail {
+    font-size: 13px; color: var(--ink-2); line-height: 1.6;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .flow-row .detail b { color: var(--ink); font-weight: 600; }
+  @media (max-width: 900px) { .flow-row { grid-template-columns: 1fr; gap: 12px; } }
+
+  /* -------- CTA band -------- */
+  .cta-band {
+    padding: 120px 0;
+    border-top: 1px solid var(--line-soft);
+    text-align: center;
+  }
+  .cta-band h2 {
+    font-size: clamp(40px, 5.2vw, 68px);
+    letter-spacing: -0.035em; line-height: 1.05;
+    max-width: 22ch; margin: 0 auto 24px;
+    text-wrap: balance;
+  }
+  .cta-band p { color: var(--ink-2); font-size: 16px; max-width: 40ch; margin: 0 auto 36px; }
+  .cta-band .hero-cta { justify-content: center; margin-bottom: 0; }
+</style>
+<style>
+/* ============================================
+   Triangle v2 — interactive stage
+   ============================================ */
+.tri-stage {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 48px;
+  align-items: center;
+  margin-top: 24px;
+}
+.tri-stage .triangle-wrap {
+  position: relative;
+  padding: 0;
+  cursor: default;
+}
+.tri-stage .triangle-wrap svg {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  overflow: visible;
+}
+
+.tri-edge {
+  fill: none; stroke: var(--line); stroke-width: 1.75;
+  stroke-linecap: round;
+  transition: stroke 0.3s ease, stroke-width 0.3s ease, opacity 0.25s ease;
+}
+.tri-edge.active { stroke: var(--ink); stroke-width: 2.25; }
+.tri-edge.dim { opacity: 0.25; }
+
+.tri-label-main {
+  font-family: var(--font-display);
+  font-size: 16px; font-weight: 600;
+  fill: var(--ink); letter-spacing: -0.01em;
+  transition: opacity 0.3s ease;
+}
+.tri-label-sub {
+  font-family: var(--font-mono);
+  font-size: 11px; fill: var(--muted);
+  letter-spacing: 0.1em;
+}
+.tri-label.dim { opacity: 0.3; }
+.tri-label.tri-label-hot .tri-label-main { fill: var(--ink); }
+
+/* Nodes */
+.tri-role { cursor: pointer; }
+.tri-node-ring {
+  fill: var(--bg); stroke: var(--line); stroke-width: 1;
+  stroke-dasharray: 2 3;
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.tri-role.on .tri-node-ring { opacity: 1; }
+.tri-node {
+  fill: var(--bg); stroke: var(--ink); stroke-width: 2;
+  transition: fill 0.3s ease, stroke 0.3s ease, r 0.3s ease;
+  transform-origin: center;
+}
+.tri-role.on .tri-node { fill: var(--ink); }
+.tri-role.dim .tri-node { stroke: var(--line); }
+.tri-role:hover .tri-node { stroke-width: 3; }
+
+.tri-node-glyph {
+  stroke: var(--ink); fill: none;
+  stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round;
+  pointer-events: none;
+  transition: stroke 0.3s ease;
+}
+.tri-role.on .tri-node-glyph { stroke: var(--bg); }
+.tri-role.dim .tri-node-glyph { stroke: var(--faint); }
+
+.tri-node-name {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 600;
+  fill: var(--ink); letter-spacing: -0.015em;
+  pointer-events: none;
+}
+.tri-node-sub {
+  font-family: var(--font-mono);
+  font-size: 11px; fill: var(--muted);
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+.tri-role.dim .tri-node-name,
+.tri-role.dim .tri-node-sub { fill: var(--faint); }
+
+.tri-center-label {
+  font-family: var(--font-mono); font-size: 11px;
+  fill: var(--muted); letter-spacing: 0.18em; text-transform: uppercase;
+}
+.tri-center-title {
+  font-family: var(--font-display); font-size: 18px;
+  fill: var(--ink); font-weight: 600; letter-spacing: -0.01em;
+}
+
+.tri-pulse {
+  fill: var(--ink);
+  filter: drop-shadow(0 0 8px color-mix(in oklab, var(--ink) 45%, transparent));
+  opacity: 0;
+}
+
+/* Detail panel on the right */
+.tri-detail {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.tri-detail-tabs {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--surface);
+}
+.tri-tab {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px 12px;
+  border: none; background: transparent;
+  font-family: var(--font-sans); font-size: 13px;
+  color: var(--muted); cursor: pointer;
+  border-right: 1px solid var(--line-soft);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+.tri-tab:last-child { border-right: none; }
+.tri-tab.on { color: var(--ink); background: var(--bg); font-weight: 600; }
+.tri-tab.on .iframe-ic { border-color: var(--ink); }
+.tri-tab:hover:not(.on) { color: var(--ink); }
+
+.tri-panes { padding: 28px 28px 24px; flex: 1; }
+.tri-pane { display: none; }
+.tri-pane.on { display: block; animation: fade-in 0.3s ease; }
+@keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+.tri-pane .eyebrow { display: block; margin-bottom: 8px; }
+.tri-pane h3 {
+  font-size: 26px; font-weight: 600; letter-spacing: -0.02em;
+  line-height: 1.15; margin: 0 0 12px;
+}
+.tri-pane > p {
+  color: var(--ink-2); font-size: 14px; line-height: 1.6;
+  margin: 0 0 20px;
+}
+.tri-list {
+  list-style: none; padding: 0;
+  border-top: 1px solid var(--line-soft);
+  margin: 0 0 20px;
+}
+.tri-list li {
+  display: grid; grid-template-columns: 56px 1fr;
+  gap: 14px; padding: 10px 0;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 13px;
+}
+.tri-list li b {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted); letter-spacing: 0.08em;
+  text-transform: uppercase; font-weight: 500;
+  padding-top: 2px;
+}
+.tri-list li span { color: var(--ink-2); line-height: 1.5; }
+
+.tri-relations {
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.tri-rel {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12.5px; color: var(--ink-2);
+}
+.tri-rel .arrow {
+  font-family: var(--font-mono); color: var(--muted);
+  width: 16px; text-align: center;
+}
+.tri-rel b { color: var(--ink); font-weight: 600; }
+
+.tri-foot {
+  padding: 12px 20px;
+  font-size: 10.5px; color: var(--muted);
+  letter-spacing: 0.1em;
+  border-top: 1px solid var(--line-soft);
+  background: var(--surface);
+  text-align: center;
+}
+
+@media (max-width: 960px) {
+  .tri-stage { grid-template-columns: 1fr; }
+}
+
+
+/* ============================================
+   Gantt timeline
+   ============================================ */
+.gantt {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  overflow: hidden;
+}
+.gantt-head {
+  display: grid; grid-template-columns: 160px 1fr;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 10px; color: var(--muted);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.gantt-role-col {
+  padding: 14px 18px;
+  border-right: 1px solid var(--line-soft);
+}
+.gantt-track-col {
+  position: relative;
+  padding: 0;
+}
+.gantt-weeks {
+  display: grid; grid-template-columns: repeat(12, 1fr);
+  padding: 14px 0 10px;
+}
+.gantt-weeks span {
+  text-align: center;
+  border-right: 1px solid var(--line-faint);
+}
+.gantt-weeks span:last-child { border-right: none; }
+.gantt-phase-band {
+  position: relative; height: 20px;
+  border-top: 1px solid var(--line-soft);
+}
+.gantt-phase {
+  position: absolute; top: 0; bottom: 0;
+  left: calc(var(--s) * 1%); width: calc((var(--e) - var(--s)) * 1%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9.5px;
+  border-right: 1px dashed var(--line);
+}
+.gantt-phase:last-child { border-right: none; }
+
+.gantt-lane {
+  display: grid; grid-template-columns: 160px 1fr;
+  border-bottom: 1px solid var(--line-soft);
+  min-height: 68px;
+}
+.gantt-lane:last-child { border-bottom: none; }
+.gantt-lane.alerts { background: var(--surface-2); }
+.gantt-role {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px;
+  border-right: 1px solid var(--line-soft);
+}
+.gantt-role .iframe-ic { width: 26px; height: 26px; border-radius: 6px; }
+.gantt-role .iframe-ic svg { width: 14px; height: 14px; }
+.gantt-role b { font-size: 14px; display: block; font-weight: 600; }
+.gantt-role small {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--muted); letter-spacing: 0.06em;
+}
+
+.gantt-track {
+  position: relative;
+  height: 68px;
+}
+.gantt-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(to right, var(--line-faint) 1px, transparent 1px);
+  background-size: calc(100% / 12) 100%;
+}
+
+/* Bars */
+.gantt-bar {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  left: calc(var(--s) * 1%);
+  width: calc((var(--e) - var(--s)) * 1%);
+  height: 26px;
+  border-radius: 6px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px;
+  font-size: 11.5px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.gantt-bar.thin { height: 14px; }
+.gantt-bar.coach {
+  background: var(--ink); color: var(--bg);
+  border: 1px solid var(--ink);
+}
+.gantt-bar.coach.thin {
+  background: repeating-linear-gradient(-45deg, var(--surface-3) 0 5px, transparent 5px 8px);
+  color: var(--ink-2);
+  border: 1px dashed var(--line);
+}
+.gantt-bar.student {
+  background: color-mix(in oklab, var(--ink) 8%, var(--bg));
+  border: 1px solid var(--ink);
+  color: var(--ink);
+}
+.gantt-bar .bar-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor; flex-shrink: 0;
+}
+.gantt-bar .bar-txt {
+  font-weight: 500;
+  text-overflow: ellipsis; overflow: hidden;
+}
+
+/* Animated pulse on student continuous bar */
+.bar-pulse {
+  position: absolute; top: 0; bottom: 0; width: 80px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--ink) 18%, transparent), transparent);
+  animation: bar-pulse 4s linear infinite;
+  pointer-events: none;
+}
+@keyframes bar-pulse {
+  from { left: -80px; }
+  to   { left: 100%; }
+}
+
+/* Milestones (diamond) */
+.gantt-milestone {
+  position: absolute; top: 50%;
+  left: calc(var(--p) * 1%);
+  transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center;
+  font-family: var(--font-mono); font-size: 9.5px;
+  color: var(--muted); letter-spacing: 0.06em;
+  pointer-events: none;
+}
+.gantt-milestone .ms-dot {
+  width: 10px; height: 10px;
+  background: var(--bg); border: 1.5px solid var(--ink);
+  transform: rotate(45deg);
+  margin-bottom: 4px;
+}
+.gantt-milestone.coach .ms-dot { background: var(--ink); }
+.gantt-milestone .ms-lbl {
+  position: absolute; top: 100%; margin-top: 4px;
+  white-space: nowrap;
+}
+
+/* Parent pulse dots */
+.gantt-pulse {
+  position: absolute; top: 50%;
+  left: calc(var(--p) * 1%);
+  transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center;
+  pointer-events: none;
+}
+.gantt-pulse .p-dot {
+  width: 10px; height: 10px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--bg);
+}
+.gantt-pulse .p-lbl {
+  position: absolute; top: 100%; margin-top: 6px;
+  font-family: var(--font-mono); font-size: 9.5px;
+  color: var(--muted); letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+/* Alerts (exception events) */
+.gantt-alert {
+  position: absolute; top: 50%;
+  left: calc(var(--p) * 1%);
+  transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center;
+  pointer-events: none;
+}
+.gantt-alert .a-flag {
+  width: 0; height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 14px solid var(--ink);
+  position: relative;
+}
+.gantt-alert[data-sev="md"] .a-flag {
+  border-bottom-color: var(--ink-2);
+}
+.gantt-alert .a-lbl {
+  position: absolute; top: 100%; margin-top: 4px;
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--ink); letter-spacing: 0.04em;
+  white-space: nowrap; font-weight: 500;
+}
+
+/* Legend + stats */
+.gantt-summary {
+  margin-top: 32px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  align-items: center;
+}
+.gantt-legend {
+  display: flex; flex-wrap: wrap; gap: 20px;
+  font-size: 12px; color: var(--ink-2);
+  font-family: var(--font-mono); letter-spacing: 0.04em;
+}
+.gantt-legend .leg { display: flex; align-items: center; gap: 8px; }
+.gantt-legend .sw {
+  width: 20px; height: 10px; border-radius: 3px;
+  border: 1px solid var(--ink);
+}
+.gantt-legend .sw.coach { background: var(--ink); }
+.gantt-legend .sw.student { background: color-mix(in oklab, var(--ink) 8%, var(--bg)); }
+.gantt-legend .sw.parent { background: var(--bg); }
+.gantt-legend .sw.parent { border-radius: 50%; height: 12px; width: 12px; }
+.gantt-legend .sw.alert {
+  width: 0; height: 0; border-radius: 0;
+  border: none; border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 10px solid var(--ink);
+}
+.gantt-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  border-left: 1px solid var(--line-soft);
+  padding-left: 24px;
+}
+.gantt-stats > div { display: flex; flex-direction: column; gap: 2px; }
+.gantt-stats b {
+  font-size: 20px; font-weight: 600;
+  color: var(--ink); letter-spacing: -0.02em;
+}
+.gantt-stats b small {
+  font-size: 11px; color: var(--muted);
+  margin-left: 2px; font-weight: 400; font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+.gantt-stats span {
+  font-size: 11px; color: var(--muted);
+  letter-spacing: 0;
+}
+
+@media (max-width: 1100px) {
+  .gantt-head, .gantt-lane { grid-template-columns: 120px 1fr; }
+  .gantt-role { padding: 12px; }
+  .gantt-role b { font-size: 12px; }
+  .gantt-summary { grid-template-columns: 1fr; }
+  .gantt-stats { border-left: none; padding-left: 0; border-top: 1px solid var(--line-soft); padding-top: 16px; }
+}
+
+</style>
+<script>
+/* ============================================
+   Interactive triangle v2
+   - Click role node or tab → highlight 2 connecting edges
+   - Swap detail pane
+   - Keeps the original entry animation (stroke-dash draw-in)
+   ============================================ */
+window.initTriangleV2 = function (rootEl) {
+  if (!rootEl || rootEl.dataset.init === '1') return;
+  rootEl.dataset.init = '1';
+
+  const edges = rootEl.querySelectorAll('.tri-edge');
+  const edgeLabels = rootEl.querySelectorAll('.tri-label');
+  const roles = rootEl.querySelectorAll('.tri-role');
+  const tabs = rootEl.querySelectorAll('.tri-tab');
+  const panes = rootEl.querySelectorAll('.tri-pane');
+
+  // edge map: role → which edges they touch
+  const roleEdges = {
+    coach:   ['CS', 'PC'],
+    student: ['CS', 'SP'],
+    parent:  ['SP', 'PC'],
+  };
+
+  // Initial draw-in animation
+  edges.forEach((p) => {
+    const len = p.getTotalLength();
+    p.style.strokeDasharray = len;
+    p.style.strokeDashoffset = len;
+    p.dataset.len = len;
+  });
+  roles.forEach(r => r.style.opacity = 0);
+  edgeLabels.forEach(l => l.style.opacity = 0);
+
+  function drawIn() {
+    const dur = 900;
+    edges.forEach((p, i) => {
+      setTimeout(() => {
+        p.style.transition = `stroke-dashoffset ${dur * 1.2}ms cubic-bezier(0.45,0,0.15,1)`;
+        p.style.strokeDashoffset = 0;
+      }, i * dur * 0.6);
+    });
+    roles.forEach((r, i) => {
+      setTimeout(() => {
+        r.style.transition = 'opacity 0.55s ease';
+        r.style.opacity = 1;
+      }, 300 + i * 400);
+    });
+    edgeLabels.forEach((l, i) => {
+      setTimeout(() => {
+        l.style.transition = 'opacity 0.4s ease';
+        l.style.opacity = 1;
+      }, 1800 + i * 150);
+    });
+
+    // After all drawn, auto-select coach once
+    setTimeout(() => selectRole('coach'), 2800);
+  }
+
+  function selectRole(which) {
+    // tabs
+    tabs.forEach(t => t.classList.toggle('on', t.dataset.tab === which));
+    panes.forEach(p => p.classList.toggle('on', p.dataset.pane === which));
+
+    // nodes
+    roles.forEach(r => {
+      const role = r.dataset.role;
+      r.classList.toggle('on', role === which);
+      r.classList.toggle('dim', role !== which);
+    });
+
+    // edges + edge labels: the 2 touching the selected role are active, other dimmed
+    const hotEdges = new Set(roleEdges[which]);
+    edges.forEach(e => {
+      const eid = e.dataset.edge;
+      if (hotEdges.has(eid)) { e.classList.add('active'); e.classList.remove('dim'); }
+      else                   { e.classList.remove('active'); e.classList.add('dim'); }
+    });
+    edgeLabels.forEach(l => {
+      const eid = l.dataset.edgeLabel;
+      l.classList.toggle('tri-label-hot', hotEdges.has(eid));
+      l.classList.toggle('dim', !hotEdges.has(eid));
+    });
+  }
+
+  roles.forEach(r => r.addEventListener('click', () => selectRole(r.dataset.role)));
+  tabs.forEach(t => t.addEventListener('click', () => selectRole(t.dataset.tab)));
+
+  // Trigger draw-in on scroll into view
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { drawIn(); io.disconnect(); }
+    });
+  }, { threshold: 0.25 });
+  io.observe(rootEl);
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-triangle]').forEach(el => window.initTriangleV2(el));
+});
+
+</script>
 </head>
 <body>
-    <div class="hero">
-        <div class="logo">🏋️</div>
-        <div class="title">HARNESS</div>
-        <div class="subtitle">三方制衡 · 科学降重 · 驾驭工程</div>
 
-        <!-- 三角制衡图 -->
-        <div class="triangle-container">
-            <div class="triangle-lines">
-                <svg viewBox="0 0 400 380">
-                    <!-- 教练-学生 -->
-                    <line x1="200" y1="80" x2="80" y2="300" />
-                    <!-- 教练-家长 -->
-                    <line x1="200" y1="80" x2="320" y2="300" />
-                    <!-- 学生-家长 -->
-                    <line x1="80" y1="300" x2="320" y2="300" />
-                </svg>
-            </div>
-
-            <a href="coach.html" class="role-node coach">
-                <span class="icon">🧠</span>
-                教练
-                <span class="label">编排器</span>
-            </a>
-            <a href="student.html" class="role-node student">
-                <span class="icon">💪</span>
-                学生
-                <span class="label">执行者</span>
-            </a>
-            <a href="parent.html" class="role-node parent">
-                <span class="icon">👁️</span>
-                家长
-                <span class="label">评估器</span>
-            </a>
-
-            <span class="link-label link-coach-student">制定计划 ↓<br>↑ 反馈数据</span>
-            <span class="link-label link-coach-parent">同步方案 ↓<br>↑ 提出建议</span>
-            <span class="link-label link-student-parent">← 打卡数据 | 监督提醒 →</span>
-        </div>
-
-        <!-- 核心理念 -->
-        <div class="principles">
-            <div class="principle">
-                <h3>🧠 激活教练</h3>
-                <p>教练制定一次计划<br>系统自动推送执行<br>异常时才需介入<br>降低注意力成本</p>
-            </div>
-            <div class="principle">
-                <h3>💪 驱动学生</h3>
-                <p>每日清单一目了然<br>打卡只需30秒<br>不打卡自动提醒<br>让偷懒无处可藏</p>
-            </div>
-            <div class="principle">
-                <h3>👁️ 赋能家长</h3>
-                <p>实时看板掌握进度<br>体重曲线一目了然<br>把焦虑变成监督力<br>为孩子提供支持</p>
-            </div>
-        </div>
-
-        <!-- 入口 -->
-        <div class="entries">
-            <a href="coach.html" class="entry-btn btn-coach">教练端</a>
-            <a href="student.html" class="entry-btn btn-student">学生端</a>
-            <a href="parent.html" class="entry-btn btn-parent">家长端</a>
-        </div>
-
-        <div class="footer">
-            Weight Harness v0.1 — 驾驭工程<br>
-            三方制衡 · 科学降重 · 安全第一
-        </div>
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">
+      <span class="brand-mark" data-icon="harness"></span><span>Weight Harness</span>
+      <span class="brand-tag">v0.1</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="active">概览</a>
+      <a href="coach.html">教练</a>
+      <a href="student.html">学生</a>
+      <a href="parent.html">家长</a>
+      <a href="#method">方法论</a>
     </div>
+    <div class="nav-right">
+      <span class="kbd">⌘K</span>
+      <a href="coach.html" class="btn" style="padding: 7px 14px; font-size: 13px;">进入系统</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow"><span class="dot"></span><span>Weight Harness · Balanced system for weight management</span></div>
+    <h1>把减重变成一个能持续运行的系统</h1>
+    <p class="hero-sub">一套把教练、学生、家长绑定在同一张计划表上的工具。教练编排，学生执行，家长监督 — 每个角色只做自己该做的事，结构承担其余。</p>
+    <div class="hero-cta">
+      <a href="coach.html" class="btn primary">进入教练端 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a href="student.html" class="btn">学生端</a>
+      <a href="parent.html" class="btn">家长端</a>
+      <span class="note">⌥ ↵ 快速登录</span>
+    </div>
+
+    <div class="concepts">
+      <a class="concept" href="coach.html">
+        <div class="concept-head">
+          <span class="iframe-ic" data-icon="coach"></span>
+          <span class="role-num">01 · COACH</span>
+        </div>
+        <h3>编排计划</h3>
+        <p>一次制定饮食与训练模板，设置异常规则。只有异常发生时才需要介入。</p>
+        <span class="concept-link">进入教练端 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+      <a class="concept" href="student.html">
+        <div class="concept-head">
+          <span class="iframe-ic" data-icon="student"></span>
+          <span class="role-num">02 · STUDENT</span>
+        </div>
+        <h3>按清单执行</h3>
+        <p>每日任务一目了然，30 秒内完成打卡。未完成会自动提醒，不需要记挂。</p>
+        <span class="concept-link">查看学生端 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+      <a class="concept" href="parent.html">
+        <div class="concept-head">
+          <span class="iframe-ic" data-icon="parent"></span>
+          <span class="role-num">03 · PARENT</span>
+        </div>
+        <h3>只看指标</h3>
+        <p>体重曲线与依从率看板。把焦虑变成结构化的监督力，不必时时盯着。</p>
+        <span class="concept-link">查看家长端 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TRIANGLE · 方法论 ===== -->
+<section class="section tri-section" id="method">
+  <div class="container">
+    <div class="section-head" style="max-width:800px">
+      <span class="eyebrow">Method · 方法论</span>
+      <h2 style="margin-top:16px">三方制衡，替代个人意志</h2>
+      <p>绝大多数减重项目失败的原因，不是方法错，而是结构错 — 信息在教练、学生、家长之间断裂。把三个角色放进同一张计划表，让计划、执行和反馈形成闭环。</p>
+    </div>
+
+    <div class="tri-stage" data-triangle>
+      <!-- Big interactive triangle on the left -->
+      <div class="triangle-wrap">
+        <svg viewBox="0 0 760 640" role="img" aria-label="三方制衡示意图">
+          <!-- center label -->
+          <g>
+            <text class="tri-center-label" x="380" y="340" text-anchor="middle">BALANCED LOOP</text>
+            <text class="tri-center-title" x="380" y="366" text-anchor="middle">三方制衡</text>
+          </g>
+
+          <!-- edges: 1) Coach→Student  2) Student→Parent  3) Parent→Coach -->
+          <path class="tri-edge" data-edge="CS" d="M 380 110 L 110 550"/>
+          <path class="tri-edge" data-edge="SP" d="M 110 550 L 650 550"/>
+          <path class="tri-edge" data-edge="PC" d="M 650 550 L 380 110"/>
+
+          <!-- edge labels -->
+          <g class="tri-label" data-edge-label="CS" transform="translate(175, 320)">
+            <text text-anchor="start" class="tri-label-main">制定计划</text>
+            <text y="20" text-anchor="start" class="tri-label-sub">COACH → STUDENT</text>
+          </g>
+          <g class="tri-label" data-edge-label="SP" transform="translate(380, 588)">
+            <text text-anchor="middle" class="tri-label-main">打卡数据</text>
+            <text y="20" text-anchor="middle" class="tri-label-sub">STUDENT → PARENT</text>
+          </g>
+          <g class="tri-label" data-edge-label="PC" transform="translate(585, 320)">
+            <text text-anchor="end" class="tri-label-main">反馈调整</text>
+            <text y="20" text-anchor="end" class="tri-label-sub">PARENT → COACH</text>
+          </g>
+
+          <!-- pulses -->
+          <circle class="tri-pulse" r="5" cx="380" cy="110"/>
+          <circle class="tri-pulse" r="5" cx="110" cy="550"/>
+          <circle class="tri-pulse" r="5" cx="650" cy="550"/>
+
+          <!-- Coach node (top) -->
+          <g class="tri-role" data-role="coach" transform="translate(380, 110)">
+            <circle class="tri-node-ring" r="78"/>
+            <circle class="tri-node" r="66"/>
+            <g class="tri-node-glyph" transform="translate(-22, -24)">
+              <path d="M9 5a3 3 0 0 0-3 3 2.5 2.5 0 0 0-1.5 4.5A2.5 2.5 0 0 0 6 17a3 3 0 0 0 3 2h1.5V5Z" transform="scale(1.9)"/>
+              <path d="M13.5 5a3 3 0 0 1 3 3 2.5 2.5 0 0 1 1.5 4.5A2.5 2.5 0 0 1 16.5 17a3 3 0 0 1-3 2H12V5Z" transform="scale(1.9)"/>
+            </g>
+            <text class="tri-node-name" y="110" text-anchor="middle">教练</text>
+            <text class="tri-node-sub" y="130" text-anchor="middle">COACH · 编排</text>
+          </g>
+
+          <!-- Student node (bottom-left) -->
+          <g class="tri-role" data-role="student" transform="translate(110, 550)">
+            <circle class="tri-node-ring" r="78"/>
+            <circle class="tri-node" r="66"/>
+            <g class="tri-node-glyph" transform="translate(-22, -22)">
+              <path d="M4 10v4M20 10v4M7 7v10M17 7v10M9 11h6M9 13h6" transform="scale(1.9)"/>
+            </g>
+            <text class="tri-node-name" y="110" text-anchor="middle">学生</text>
+            <text class="tri-node-sub" y="130" text-anchor="middle">STUDENT · 执行</text>
+          </g>
+
+          <!-- Parent node (bottom-right) -->
+          <g class="tri-role" data-role="parent" transform="translate(650, 550)">
+            <circle class="tri-node-ring" r="78"/>
+            <circle class="tri-node" r="66"/>
+            <g class="tri-node-glyph" transform="translate(-22, -22)">
+              <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" transform="scale(1.9)"/>
+              <circle cx="12" cy="12" r="2.5" transform="scale(1.9)"/>
+            </g>
+            <text class="tri-node-name" y="110" text-anchor="middle">家长</text>
+            <text class="tri-node-sub" y="130" text-anchor="middle">PARENT · 监督</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Right: details panel that swaps when a role is selected -->
+      <aside class="tri-detail" data-detail>
+        <div class="tri-detail-tabs">
+          <button class="tri-tab on" data-tab="coach"><span class="iframe-ic sm" data-icon="coach"></span><span>教练</span></button>
+          <button class="tri-tab" data-tab="student"><span class="iframe-ic sm" data-icon="student"></span><span>学生</span></button>
+          <button class="tri-tab" data-tab="parent"><span class="iframe-ic sm" data-icon="parent"></span><span>家长</span></button>
+        </div>
+
+        <div class="tri-panes">
+          <div class="tri-pane on" data-pane="coach">
+            <span class="eyebrow">01 · COACH</span>
+            <h3>编排一次，之后只管异常。</h3>
+            <p>教练基于学生数据生成三周起始计划，设置异常阈值。正常运行时无需干预，系统只在数据偏离时发送结构化告警。</p>
+            <ul class="tri-list">
+              <li><b>职责</b><span>制定计划 · 设置告警规则 · 周期性复盘</span></li>
+              <li><b>输入</b><span>学生打卡数据（每日） · 家长留言（按需）</span></li>
+              <li><b>输出</b><span>计划调整 · 每周小结 · 异常响应</span></li>
+            </ul>
+            <div class="tri-relations">
+              <div class="tri-rel"><span class="arrow">→</span><span class="rel-txt"><b>制定计划</b> 传递给 学生</span></div>
+              <div class="tri-rel"><span class="arrow">←</span><span class="rel-txt"><b>反馈调整</b> 接收自 家长</span></div>
+            </div>
+          </div>
+
+          <div class="tri-pane" data-pane="student">
+            <span class="eyebrow">02 · STUDENT</span>
+            <h3>按清单执行，不用规划。</h3>
+            <p>每日任务按时段排列，单项 10–30 秒完成。没有排行榜，没有比较，没有社交压力；未完成自动触发提醒。</p>
+            <ul class="tri-list">
+              <li><b>职责</b><span>按任务清单执行 · 打卡记录 · 必要时申请调整</span></li>
+              <li><b>输入</b><span>每日任务（来自教练） · 完成提醒（系统）</span></li>
+              <li><b>输出</b><span>体重 · 饮食 · 训练打卡数据</span></li>
+            </ul>
+            <div class="tri-relations">
+              <div class="tri-rel"><span class="arrow">←</span><span class="rel-txt"><b>制定计划</b> 接收自 教练</span></div>
+              <div class="tri-rel"><span class="arrow">→</span><span class="rel-txt"><b>打卡数据</b> 传递给 家长 / 教练</span></div>
+            </div>
+          </div>
+
+          <div class="tri-pane" data-pane="parent">
+            <span class="eyebrow">03 · PARENT</span>
+            <h3>只看指标，不催不问。</h3>
+            <p>家长端展示体重曲线与依从率。不能修改计划、不能催促，只能在看板上留一条简短的鼓励 — 把焦虑变成结构化的监督力。</p>
+            <ul class="tri-list">
+              <li><b>职责</b><span>每周查看进展 · 留言鼓励 · 异常时响应</span></li>
+              <li><b>输入</b><span>体重曲线 · 依从率看板 · 教练小结</span></li>
+              <li><b>输出</b><span>鼓励留言 · 异常反馈（给教练）</span></li>
+            </ul>
+            <div class="tri-relations">
+              <div class="tri-rel"><span class="arrow">←</span><span class="rel-txt"><b>打卡数据</b> 接收自 学生</span></div>
+              <div class="tri-rel"><span class="arrow">→</span><span class="rel-txt"><b>反馈调整</b> 传递给 教练</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tri-foot mono">点击左侧角色或上方标签切换视角</div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===== METRICS ===== -->
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Results · 早期用户数据</span>
+      <h2>用结构，不用口号</h2>
+      <p>来自 Harness 前 60 位封闭测试用户在 12 周内的数据。</p>
+    </div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="label">Task Completion</div>
+        <div class="value">92<small>%</small></div>
+        <div class="caption">平均日打卡完成率</div>
+      </div>
+      <div class="metric">
+        <div class="label">Coach Intervention</div>
+        <div class="value">&lt; 2<small>次/周</small></div>
+        <div class="caption">教练主动介入频次</div>
+      </div>
+      <div class="metric">
+        <div class="label">Weight Change</div>
+        <div class="value">−4.1<small>kg</small></div>
+        <div class="caption">12 周中位数</div>
+      </div>
+      <div class="metric">
+        <div class="label">Retention @12W</div>
+        <div class="value">88<small>%</small></div>
+        <div class="caption">坚持至周期结束占比</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOW IT WORKS · Gantt timeline ===== -->
+<section class="section" style="background:var(--surface-2)" id="flow">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">How it works · 90 天运行周期</span>
+      <h2>从第一次打开，到第 12 周</h2>
+      <p>三方活动节奏可视化。教练集中投入在计划与复盘，学生每日稳定执行，家长周度介入即可。</p>
+    </div>
+
+    <div class="gantt">
+      <!-- Week scale -->
+      <div class="gantt-head">
+        <div class="gantt-role-col">角色</div>
+        <div class="gantt-track-col">
+          <div class="gantt-weeks">
+            <span>W1</span><span>W2</span><span>W3</span><span>W4</span>
+            <span>W5</span><span>W6</span><span>W7</span><span>W8</span>
+            <span>W9</span><span>W10</span><span>W11</span><span>W12</span>
+          </div>
+          <div class="gantt-phase-band">
+            <div class="gantt-phase" style="--s:0; --e:25">Phase 1 · 建立节奏</div>
+            <div class="gantt-phase" style="--s:25; --e:75">Phase 2 · 稳定运行</div>
+            <div class="gantt-phase" style="--s:75; --e:100">Phase 3 · 复盘迭代</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coach lane -->
+      <div class="gantt-lane">
+        <div class="gantt-role">
+          <span class="iframe-ic sm" data-icon="coach"></span>
+          <div>
+            <b>教练</b>
+            <small>编排 + 响应</small>
+          </div>
+        </div>
+        <div class="gantt-track">
+          <div class="gantt-grid"></div>
+          <div class="gantt-bar coach" style="--s:0; --e:12"  data-lbl="初始计划编排">
+            <span class="bar-dot"></span><span class="bar-txt">初始编排</span>
+          </div>
+          <div class="gantt-milestone coach" style="--p:25" data-lbl="阶段性调整"><span class="ms-dot"></span><span class="ms-lbl">调整 1</span></div>
+          <div class="gantt-milestone coach" style="--p:50" data-lbl="阶段性调整"><span class="ms-dot"></span><span class="ms-lbl">调整 2</span></div>
+          <div class="gantt-milestone coach" style="--p:75" data-lbl="阶段性调整"><span class="ms-dot"></span><span class="ms-lbl">调整 3</span></div>
+          <div class="gantt-bar coach thin" style="--s:12; --e:100" data-lbl="被动响应告警">
+            <span class="bar-txt">被动响应告警</span>
+          </div>
+          <div class="gantt-bar coach" style="--s:88; --e:100" data-lbl="阶段复盘">
+            <span class="bar-dot"></span><span class="bar-txt">阶段复盘</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Student lane -->
+      <div class="gantt-lane">
+        <div class="gantt-role">
+          <span class="iframe-ic sm" data-icon="student"></span>
+          <div>
+            <b>学生</b>
+            <small>每日执行</small>
+          </div>
+        </div>
+        <div class="gantt-track">
+          <div class="gantt-grid"></div>
+          <div class="gantt-bar student" style="--s:0; --e:100" data-lbl="每日打卡执行">
+            <span class="bar-dot"></span><span class="bar-txt">每日打卡执行 · 体重 / 饮食 / 训练</span>
+            <div class="bar-pulse"></div>
+          </div>
+          <div class="gantt-milestone student" style="--p:33" data-lbl=""><span class="ms-dot"></span><span class="ms-lbl">月度称重</span></div>
+          <div class="gantt-milestone student" style="--p:66" data-lbl=""><span class="ms-dot"></span><span class="ms-lbl">月度称重</span></div>
+          <div class="gantt-milestone student" style="--p:98" data-lbl=""><span class="ms-dot"></span><span class="ms-lbl">月度称重</span></div>
+        </div>
+      </div>
+
+      <!-- Parent lane -->
+      <div class="gantt-lane">
+        <div class="gantt-role">
+          <span class="iframe-ic sm" data-icon="parent"></span>
+          <div>
+            <b>家长</b>
+            <small>周度查看</small>
+          </div>
+        </div>
+        <div class="gantt-track">
+          <div class="gantt-grid"></div>
+          <div class="gantt-pulse parent" style="--p:8"><span class="p-dot"></span><span class="p-lbl">查看</span></div>
+          <div class="gantt-pulse parent" style="--p:16"><span class="p-dot"></span><span class="p-lbl">查看</span></div>
+          <div class="gantt-pulse parent" style="--p:25"><span class="p-dot"></span><span class="p-lbl">留言</span></div>
+          <div class="gantt-pulse parent" style="--p:33"><span class="p-dot"></span></div>
+          <div class="gantt-pulse parent" style="--p:41"><span class="p-dot"></span></div>
+          <div class="gantt-pulse parent" style="--p:50"><span class="p-dot"></span><span class="p-lbl">留言</span></div>
+          <div class="gantt-pulse parent" style="--p:58"><span class="p-dot"></span></div>
+          <div class="gantt-pulse parent" style="--p:66"><span class="p-dot"></span></div>
+          <div class="gantt-pulse parent" style="--p:75"><span class="p-dot"></span><span class="p-lbl">留言</span></div>
+          <div class="gantt-pulse parent" style="--p:83"><span class="p-dot"></span></div>
+          <div class="gantt-pulse parent" style="--p:91"><span class="p-dot"></span></div>
+          <div class="gantt-pulse parent" style="--p:96"><span class="p-dot"></span><span class="p-lbl">复盘</span></div>
+        </div>
+      </div>
+
+      <!-- Alerts lane (exception events) -->
+      <div class="gantt-lane alerts">
+        <div class="gantt-role">
+          <span class="iframe-ic sm" data-icon="bell"></span>
+          <div>
+            <b>异常事件</b>
+            <small>按需触发</small>
+          </div>
+        </div>
+        <div class="gantt-track">
+          <div class="gantt-grid"></div>
+          <div class="gantt-alert" style="--p:18" data-sev="md"><span class="a-flag"></span><span class="a-lbl">连续未打卡</span></div>
+          <div class="gantt-alert" style="--p:42" data-sev="hi"><span class="a-flag"></span><span class="a-lbl">单餐超标</span></div>
+          <div class="gantt-alert" style="--p:70" data-sev="md"><span class="a-flag"></span><span class="a-lbl">体重平台</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legend + summary -->
+    <div class="gantt-summary">
+      <div class="gantt-legend">
+        <span class="leg"><i class="sw coach"></i>教练 · 集中投入</span>
+        <span class="leg"><i class="sw student"></i>学生 · 持续执行</span>
+        <span class="leg"><i class="sw parent"></i>家长 · 周度介入</span>
+        <span class="leg"><i class="sw alert"></i>异常事件</span>
+      </div>
+      <div class="gantt-stats">
+        <div><b class="mono">15<small>min</small></b><span>教练初始编排</span></div>
+        <div><b class="mono">5<small>min</small></b><span>学生日均耗时</span></div>
+        <div><b class="mono">1<small>次/周</small></b><span>家长查看节奏</span></div>
+        <div><b class="mono">&lt;2<small>次/周</small></b><span>教练介入频次</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===== CTA ===== -->
+<section class="cta-band">
+  <div class="container">
+    <h2>选择一个角色，开始运行</h2>
+    <p>进入任意一个角色端，体验对应视角下的完整流程。所有数据为演示数据。</p>
+    <div class="hero-cta">
+      <a href="coach.html" class="btn primary">教练端 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a href="student.html" class="btn">学生端</a>
+      <a href="parent.html" class="btn">家长端</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="nav-brand" style="margin-bottom:8px">
+        <span class="brand-mark" data-icon="harness"></span>
+        <span>Weight Harness</span>
+      </div>
+      <div style="color:var(--muted)">© 2026 Harness Engineering · 驾驭，比努力更重要</div>
+    </div>
+    <div class="footer-cols">
+      <div>
+        <h5>Product</h5>
+        <a href="coach.html">教练端</a>
+        <a href="student.html">学生端</a>
+        <a href="parent.html">家长端</a>
+      </div>
+      <div>
+        <h5>Company</h5>
+        <a href="#">方法论</a>
+        <a href="#">案例</a>
+        <a href="#">博客</a>
+      </div>
+      <div>
+        <h5>Support</h5>
+        <a href="#">文档</a>
+        <a href="#">联系</a>
+        <a href="#" data-theme-toggle style="cursor:pointer">主题 · <span data-theme-sync="chip">Dark</span></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Tweaks -->
+<div class="tweaks-panel" id="tweaks">
+  <h4>Tweaks</h4>
+  <div class="tweak-row">
+    <span>外观</span>
+    <span class="seg-toggle">
+      <button data-theme="light" class="on">浅色</button>
+      <button data-theme="dark">深色</button>
+    </span>
+  </div>
+  <div class="tweak-row">
+    <span>三角动画</span>
+    <button class="btn ghost" style="padding:5px 12px; font-size:11px;" onclick="document.querySelectorAll('[data-triangle]').forEach(el => { el.dispatchEvent(new MouseEvent('click')); })">重播</button>
+  </div>
+</div>
+
+<script>
+// Shared SF Symbols-style line icons. 24x24 viewBox, 1.5 stroke.
+// Usage: <span class="iframe-ic" data-icon="coach"></span>
+//        hydrateIcons(root?)
+
+const ICONS = {
+  // Logo — harness/ribcage glyph
+  harness: `<path d="M6 4v16M18 4v16M6 9h12M6 15h12"/>`,
+
+  // Coach — brain / planning
+  coach: `<path d="M9 5a3 3 0 0 0-3 3 2.5 2.5 0 0 0-1.5 4.5A2.5 2.5 0 0 0 6 17a3 3 0 0 0 3 2h1.5V5Z"/><path d="M13.5 5a3 3 0 0 1 3 3 2.5 2.5 0 0 1 1.5 4.5A2.5 2.5 0 0 1 16.5 17a3 3 0 0 1-3 2H12V5Z"/>`,
+
+  // Student — dumbbell
+  student: `<path d="M4 10v4M20 10v4M7 7v10M17 7v10M9 11h6M9 13h6"/>`,
+
+  // Parent — eye
+  parent: `<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/>`,
+
+  // Chart / trend
+  chart: `<path d="M4 19V5M4 19h16M7 15l3-4 3 2 4-6"/>`,
+
+  // Check
+  check: `<path d="M5 12l4 4 10-10"/>`,
+
+  // Plus
+  plus: `<path d="M12 5v14M5 12h14"/>`,
+
+  // Bell (alert)
+  bell: `<path d="M6 15V10a6 6 0 0 1 12 0v5l1.5 2h-15zM10 19a2 2 0 0 0 4 0"/>`,
+
+  // Calendar
+  calendar: `<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>`,
+
+  // Clock
+  clock: `<circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/>`,
+
+  // Arrow right
+  arrowRight: `<path d="M5 12h14M13 6l6 6-6 6"/>`,
+
+  // Settings
+  gear: `<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>`,
+
+  // Scale
+  scale: `<path d="M5 20h14M7 20V9h10v11M9 9a3 3 0 0 1 6 0M10 13l4 4M14 13l-4 4"/>`,
+
+  // Message
+  message: `<path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-4 4v-4H6a2 2 0 0 1-2-2z"/>`,
+
+  // Search
+  search: `<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/>`,
+
+  // Food/plate
+  plate: `<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/>`,
+
+  // Run
+  run: `<circle cx="14" cy="5" r="2"/><path d="M8 12l3-3 3 2 2 4M6 19l3-4 2 2M15 14l3 1v4"/>`,
+
+  // Book / docs
+  book: `<path d="M5 5a2 2 0 0 1 2-2h11v16H7a2 2 0 0 0-2 2V5zM5 5v16"/>`,
+
+  // Triangle
+  triangle: `<path d="M12 4 L21 20 H3 Z"/>`,
+
+  // Sun / Moon
+  sun: `<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.5 5.5l1.5 1.5M17 17l1.5 1.5M5.5 18.5 7 17M17 7l1.5-1.5"/>`,
+  moon: `<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>`,
+
+  // Logout
+  logout: `<path d="M9 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4M15 8l4 4-4 4M11 12h8"/>`,
+
+  // Flow (for hero product ph)
+  flow: `<rect x="3" y="4" width="7" height="5" rx="1"/><rect x="14" y="4" width="7" height="5" rx="1"/><rect x="3" y="15" width="7" height="5" rx="1"/><rect x="14" y="15" width="7" height="5" rx="1"/><path d="M10 6.5h4M10 17.5h4M6.5 9v6M17.5 9v6"/>`,
+
+  // External / link
+  external: `<path d="M14 5h5v5M19 5 10 14M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5"/>`,
+};
+
+function iconSVG(name) {
+  const d = ICONS[name];
+  if (!d) return '';
+  return `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+}
+
+function hydrateIcons(root) {
+  (root || document).querySelectorAll('[data-icon]').forEach(el => {
+    const name = el.getAttribute('data-icon');
+    if (ICONS[name]) el.innerHTML = iconSVG(name);
+  });
+}
+
+window.ICONS = ICONS;
+window.iconSVG = iconSVG;
+window.hydrateIcons = hydrateIcons;
+document.addEventListener('DOMContentLoaded', () => hydrateIcons());
+
+</script>
+<script>
+// Weight Harness — shared app behavior
+// - Theme persistence & toggle
+// - Edit-mode (Tweaks) protocol
+// - Animated triangle (stroke-dash draw-in → 2-3 loop pulses → static)
+
+(function () {
+  const root = document.documentElement;
+  const saved = localStorage.getItem('wh-theme') || 'light';
+  root.setAttribute('data-theme', saved);
+
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    localStorage.setItem('wh-theme', t);
+    document.querySelectorAll('[data-theme-sync]').forEach(el => {
+      const mode = el.getAttribute('data-theme-sync');
+      if (mode === 'chip') el.textContent = t === 'dark' ? 'Light' : 'Dark';
+    });
+    document.querySelectorAll('.seg-toggle button[data-theme]').forEach(b => {
+      b.classList.toggle('on', b.dataset.theme === t);
+    });
+  }
+  applyTheme(saved);
+
+  document.addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-theme-toggle]');
+    if (chip) {
+      const cur = root.getAttribute('data-theme');
+      applyTheme(cur === 'dark' ? 'light' : 'dark');
+      try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { theme: root.getAttribute('data-theme') } }, '*'); } catch(e) {}
+    }
+    const seg = e.target.closest('.seg-toggle button[data-theme]');
+    if (seg) {
+      applyTheme(seg.dataset.theme);
+      try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { theme: seg.dataset.theme } }, '*'); } catch(e) {}
+    }
+  });
+
+  // Tweaks panel
+  const panel = document.getElementById('tweaks');
+  window.addEventListener('message', (e) => {
+    const d = e.data || {};
+    if (d.type === '__activate_edit_mode' && panel) panel.classList.add('on');
+    if (d.type === '__deactivate_edit_mode' && panel) panel.classList.remove('on');
+  });
+  try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch (e) {}
+})();
+
+
+/* ============================================
+   Animated triangle — draw-in then loop-pulse
+   ============================================ */
+window._disabled_initTriangle = function _disabled_initTriangle(rootEl) {
+  if (!rootEl || rootEl.dataset.init === '1') return;
+  rootEl.dataset.init = '1';
+
+  const paths = rootEl.querySelectorAll('.tri-edge');
+  const nodes = rootEl.querySelectorAll('.tri-node');
+  const labels = rootEl.querySelectorAll('.tri-label');
+  const pulses = rootEl.querySelectorAll('.tri-pulse');
+  const nodeLabels = rootEl.querySelectorAll('.tri-node-label');
+
+  // pre-set stroke dash
+  paths.forEach((p) => {
+    const len = p.getTotalLength();
+    p.style.strokeDasharray = len;
+    p.style.strokeDashoffset = len;
+    p.dataset.len = len;
+  });
+  nodes.forEach(n => n.classList.add('tri-node-hidden'));
+  labels.forEach(l => l.classList.add('tri-label-hidden'));
+  nodeLabels.forEach(l => l.classList.add('tri-label-hidden'));
+  pulses.forEach(p => p.style.opacity = 0);
+
+  function drawIn() {
+    // Draw each edge sequentially over ~6s total
+    const dur = 1800; // per edge
+    paths.forEach((p, i) => {
+      setTimeout(() => {
+        p.style.transition = `stroke-dashoffset ${dur}ms cubic-bezier(0.45,0,0.15,1)`;
+        p.style.strokeDashoffset = 0;
+      }, i * dur);
+    });
+
+    // Reveal nodes staggered with edges
+    nodes.forEach((n, i) => {
+      setTimeout(() => n.classList.remove('tri-node-hidden'), 200 + i * dur);
+    });
+    nodeLabels.forEach((l, i) => {
+      setTimeout(() => l.classList.remove('tri-label-hidden'), 500 + i * dur);
+    });
+
+    // Reveal edge labels after draw
+    setTimeout(() => {
+      labels.forEach((l, i) => {
+        setTimeout(() => l.classList.remove('tri-label-hidden'), i * 120);
+      });
+    }, paths.length * dur);
+
+    // Start pulses
+    setTimeout(startPulse, paths.length * dur + 400);
+  }
+
+  let pulseCount = 0;
+  const maxPulses = 3;
+
+  function startPulse() {
+    if (pulseCount >= maxPulses) {
+      // Rest state: make edges solid, hide pulses, re-highlight labels
+      pulses.forEach(p => { p.style.opacity = 0; });
+      rootEl.classList.add('tri-rest');
+      return;
+    }
+    pulseCount++;
+    // Each pulse travels around 3 edges (coach → student → parent → coach)
+    pulses.forEach((pulseEl, edgeIdx) => {
+      const edge = paths[edgeIdx];
+      const total = +edge.dataset.len;
+      const dur = 1200;
+      const delay = edgeIdx * dur;
+
+      setTimeout(() => {
+        const start = performance.now();
+        pulseEl.style.opacity = 1;
+        function step(t) {
+          const p = Math.min(1, (t - start) / dur);
+          const pt = edge.getPointAtLength(p * total);
+          pulseEl.setAttribute('cx', pt.x);
+          pulseEl.setAttribute('cy', pt.y);
+
+          // Highlight associated label when pulse is in its window
+          const lbl = labels[edgeIdx];
+          if (lbl) {
+            if (p > 0.25 && p < 0.75) lbl.classList.add('tri-label-hot');
+            else lbl.classList.remove('tri-label-hot');
+          }
+
+          if (p < 1) requestAnimationFrame(step);
+          else {
+            pulseEl.style.opacity = 0;
+            if (lbl) lbl.classList.remove('tri-label-hot');
+            // When final pulse of this loop finishes, schedule next loop
+            if (edgeIdx === pulses.length - 1) {
+              setTimeout(startPulse, 300);
+            }
+          }
+        }
+        requestAnimationFrame(step);
+      }, delay);
+    });
+  }
+
+  // Trigger on scroll into view
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        drawIn();
+        io.disconnect();
+      }
+    });
+  }, { threshold: 0.35 });
+  io.observe(rootEl);
+
+  // Click to replay
+  rootEl.addEventListener('click', () => {
+    if (!rootEl.classList.contains('tri-rest')) return;
+    rootEl.classList.remove('tri-rest');
+    pulseCount = 0;
+    // reset and redraw
+    paths.forEach(p => { p.style.transition = 'none'; p.style.strokeDashoffset = p.dataset.len; });
+    nodes.forEach(n => n.classList.add('tri-node-hidden'));
+    labels.forEach(l => { l.classList.add('tri-label-hidden'); l.classList.remove('tri-label-hot'); });
+    nodeLabels.forEach(l => l.classList.add('tri-label-hidden'));
+    // force reflow
+    void rootEl.offsetWidth;
+    drawIn();
+  });
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  /* disabled; see initTriangleV2 */
+});
+
+</script>
 </body>
 </html>

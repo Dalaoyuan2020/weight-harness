@@ -1,0 +1,95 @@
+/* ============================================
+   Triangle diagram — animated
+   ============================================ */
+.triangle-wrap {
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 0;
+  cursor: pointer;
+}
+.triangle-wrap svg {
+  width: 100%; max-width: 680px; height: auto;
+  overflow: visible;
+}
+
+.tri-edge {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+}
+
+.tri-arrow {
+  fill: var(--ink);
+  opacity: 0;
+  transition: opacity 0.6s ease 0.3s;
+}
+.tri-rest .tri-arrow { opacity: 1; }
+
+.tri-node {
+  fill: var(--bg);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  transform-origin: center;
+  transition: opacity 0.55s cubic-bezier(.2,.7,.2,1), transform 0.55s cubic-bezier(.2,.7,.2,1);
+}
+.tri-node-hidden { opacity: 0; transform: scale(0.6); }
+
+.tri-node-glyph {
+  stroke: var(--ink); fill: none;
+  stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+  transition: opacity 0.55s ease;
+}
+.tri-node-hidden + .tri-node-glyph { opacity: 0; }
+
+.tri-label, .tri-node-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--muted);
+  letter-spacing: 0.08em;
+  transition: opacity 0.4s ease, fill 0.25s ease;
+}
+.tri-label-hidden { opacity: 0; }
+
+.tri-label.tri-label-hot {
+  fill: var(--ink);
+  font-weight: 600;
+}
+
+.tri-node-name {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  fill: var(--ink);
+  letter-spacing: -0.01em;
+  transition: opacity 0.4s ease;
+}
+
+.tri-pulse {
+  fill: var(--ink);
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--ink) 40%, transparent));
+}
+
+.tri-center-label {
+  font-family: var(--font-mono); font-size: 10px;
+  fill: var(--muted); letter-spacing: 0.14em; text-transform: uppercase;
+}
+.tri-center-title {
+  font-family: var(--font-display); font-size: 13px;
+  fill: var(--ink); font-weight: 600;
+}
+
+/* Replay hint */
+.triangle-wrap::after {
+  content: "";
+  display: block;
+}
+.tri-replay {
+  position: absolute; right: 16px; top: 16px;
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--muted); opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  letter-spacing: 0.1em;
+}
+.tri-rest .tri-replay { opacity: 0.7; }
+.tri-section { position: relative; }

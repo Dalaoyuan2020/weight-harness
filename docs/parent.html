@@ -1,149 +1,819 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>家长端 — Weight Harness</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, 'PingFang SC', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #10b981, #059669); padding: 20px; display: flex; align-items: center; gap: 12px; }
-        .header a { color: #fff; text-decoration: none; font-size: 20px; }
-        .header h1 { font-size: 20px; }
-        .container { max-width: 600px; margin: 0 auto; padding: 24px; }
-        .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
-        .card h2 { font-size: 18px; margin-bottom: 16px; color: #10b981; }
+<meta charset="UTF-8">
+<title>家长端 · Weight Harness</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* ============================================
+   Weight Harness — Shared design tokens & layout
+   Apple HIG / Developer style · 纯黑白灰
+   ============================================ */
 
-        /* 状态概览 */
-        .overview {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
-        }
-        .overview-item {
-            background: rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; text-align: center;
-        }
-        .overview-item .value { font-size: 28px; font-weight: 800; }
-        .overview-item .label { font-size: 12px; color: #888; margin-top: 4px; }
-        .green { color: #10b981; }
-        .yellow { color: #f59e0b; }
-        .red { color: #ef4444; }
+:root {
+  --bg: #ffffff;
+  --surface: #fbfbfd;
+  --surface-2: #f5f5f7;
+  --surface-3: #eeeef1;
+  --line: #d2d2d7;
+  --line-soft: #e8e8ed;
+  --line-faint: #f0f0f3;
+  --ink: #1d1d1f;
+  --ink-2: #424245;
+  --muted: #86868b;
+  --faint: #aeaeb2;
+  --accent: #1d1d1f;
 
-        /* 体重曲线占位 */
-        .chart-placeholder {
-            background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.1);
-            border-radius: 12px; height: 200px; display: flex; align-items: center; justify-content: center;
-            color: #444; font-size: 14px;
-        }
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 22px;
 
-        /* 今日执行情况 */
-        .progress-bar-bg {
-            width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; margin: 8px 0;
-        }
-        .progress-bar-fill {
-            height: 100%; border-radius: 6px; background: linear-gradient(90deg, #10b981, #059669);
-            transition: width 0.5s;
-        }
+  --max: 1360px;
+  --pad: 32px;
 
-        .checkin-status { display: flex; align-items: center; gap: 8px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-        .dot-done { background: #10b981; }
-        .dot-pending { background: #444; }
-        .checkin-text { font-size: 14px; }
-        .checkin-time { font-size: 12px; color: #666; margin-left: auto; }
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro SC", "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif;
+  --font-mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+}
 
-        /* 鼓励 */
-        .encourage {
-            background: rgba(16,185,129,0.1); border-radius: 12px; padding: 20px; text-align: center;
-            font-size: 15px; line-height: 1.8;
-        }
-    </style>
+html[data-theme="dark"] {
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface-2: #141416;
+  --surface-3: #1c1c1e;
+  --line: #2a2a2e;
+  --line-soft: #1c1c1e;
+  --line-faint: #141416;
+  --ink: #f5f5f7;
+  --ink-2: #c7c7cc;
+  --muted: #86868b;
+  --faint: #48484a;
+  --accent: #f5f5f7;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "tnum" on, "kern" on, "ss01" on;
+  letter-spacing: -0.005em;
+  line-height: 1.5;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
+
+.mono { font-family: var(--font-mono); }
+
+/* ---- Top navigation ---- */
+.nav {
+  position: sticky; top: 0; z-index: 80;
+  background: color-mix(in oklab, var(--bg) 78%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line-soft);
+}
+.nav-inner {
+  max-width: var(--max); margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px var(--pad); gap: 24px;
+  height: 56px;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 600; font-size: 15px; letter-spacing: -0.01em;
+}
+.nav-brand .brand-mark {
+  width: 22px; height: 22px; border-radius: 6px;
+  border: 1.5px solid var(--ink);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.nav-brand .brand-mark svg { width: 14px; height: 14px; stroke: var(--ink); fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.nav-brand .brand-tag {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--muted); letter-spacing: 0.06em;
+  margin-left: 2px;
+}
+.nav-links {
+  display: flex; gap: 28px;
+  font-size: 13px; color: var(--ink-2);
+}
+.nav-links a {
+  position: relative; padding: 6px 0;
+  transition: color 0.15s ease;
+}
+.nav-links a.active { color: var(--ink); }
+.nav-links a.active::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -14px;
+  height: 1px; background: var(--ink);
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-right {
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--muted);
+}
+.nav-right .kbd {
+  border: 1px solid var(--line); padding: 3px 8px; border-radius: 5px;
+  background: var(--surface); color: var(--ink-2);
+}
+
+/* ---- Common page helpers ---- */
+.container { max-width: var(--max); margin: 0 auto; padding: 0 var(--pad); }
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600; letter-spacing: -0.022em;
+  margin: 0;
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 11px 20px; border-radius: 999px;
+  border: 1px solid var(--ink); background: transparent;
+  color: var(--ink); font-size: 14px;
+  cursor: pointer; transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--ink); color: var(--bg); }
+.btn.primary { background: var(--ink); color: var(--bg); }
+.btn.primary:hover { background: var(--ink-2); border-color: var(--ink-2); }
+.btn.ghost { border-color: var(--line); color: var(--muted); }
+.btn.ghost:hover { background: transparent; color: var(--ink); border-color: var(--ink); }
+
+/* ---- Icon frame ---- */
+.iframe-ic {
+  width: 28px; height: 28px; border: 1px solid var(--line);
+  border-radius: 7px; display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.iframe-ic.sm { width: 22px; height: 22px; border-radius: 5px; }
+.iframe-ic.lg { width: 44px; height: 44px; border-radius: 11px; }
+.iframe-ic svg {
+  width: 60%; height: 60%;
+  stroke: var(--ink); fill: none;
+  stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* ---- Page-scope chip / segmented ---- */
+.seg {
+  display: inline-flex; padding: 3px; border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted); background: var(--bg);
+}
+.seg span { padding: 5px 11px; border-radius: 6px; cursor: pointer; }
+.seg span.on { background: var(--ink); color: var(--bg); }
+
+/* ---- KPI card ---- */
+.kpi-row { display: grid; gap: 12px; }
+.kpi {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 6px;
+  background: var(--bg);
+}
+.kpi .k-lbl {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+}
+.kpi .k-val { font-size: 28px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; }
+.kpi .k-val small { font-size: 14px; color: var(--muted); font-weight: 400; margin-left: 2px; }
+.kpi .k-delta { font-size: 11.5px; color: var(--muted); }
+
+/* ---- List row ---- */
+.lrow {
+  display: grid; grid-template-columns: 22px 1fr auto auto;
+  gap: 14px; padding: 14px 4px;
+  border-bottom: 1px solid var(--line-soft);
+  align-items: center;
+}
+.lrow:last-child { border-bottom: none; }
+.check {
+  width: 18px; height: 18px; border: 1.5px solid var(--line); border-radius: 5px;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.check.done { background: var(--ink); border-color: var(--ink); }
+.check.done::after {
+  content: ""; width: 9px; height: 5px;
+  border-left: 1.5px solid var(--bg); border-bottom: 1.5px solid var(--bg);
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+.lrow .label { font-size: 13.5px; }
+.lrow .label.muted { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--faint); }
+.lrow .meta { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+.chipette {
+  font-size: 10px; border: 1px solid var(--line); padding: 3px 9px;
+  border-radius: 999px; color: var(--muted);
+  font-family: var(--font-mono); letter-spacing: 0.04em;
+}
+
+/* ---- Section headers ---- */
+.section {
+  padding: 96px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.section-head { margin-bottom: 40px; max-width: 760px; }
+.section-head h2 {
+  font-size: 36px; line-height: 1.15;
+  margin-top: 14px;
+}
+.section-head p {
+  margin: 16px 0 0; color: var(--ink-2); font-size: 15.5px; max-width: 60ch;
+}
+
+/* ---- Panel card ---- */
+.panel {
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: var(--bg);
+  overflow: hidden;
+}
+.panel-head {
+  padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--line-soft);
+}
+.panel-head .eyebrow { margin: 0; }
+.panel-head .title { font-size: 15px; font-weight: 600; }
+.panel-body { padding: 20px; }
+
+/* ---- Footer ---- */
+.footer {
+  border-top: 1px solid var(--line-soft);
+  padding: 48px var(--pad);
+  margin-top: 40px;
+  font-size: 12px; color: var(--muted);
+  font-family: var(--font-mono); letter-spacing: 0.02em;
+}
+.footer-inner {
+  max-width: var(--max); margin: 0 auto;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+}
+.footer-cols { display: flex; gap: 48px; }
+.footer-cols > div { display: flex; flex-direction: column; gap: 6px; }
+.footer-cols h5 { font-size: 10px; color: var(--ink); letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 6px; }
+.footer-cols a:hover { color: var(--ink); }
+
+/* ---- Tweaks panel ---- */
+.tweaks-panel {
+  position: fixed; right: 20px; bottom: 20px; z-index: 200;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 16px; min-width: 220px;
+  display: none; flex-direction: column; gap: 12px;
+  font-size: 12px; color: var(--ink);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+}
+.tweaks-panel.on { display: flex; }
+.tweaks-panel h4 {
+  margin: 0; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); font-family: var(--font-mono);
+}
+.tweak-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.seg-toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; padding: 2px; }
+.seg-toggle button {
+  background: transparent; border: none; padding: 5px 11px;
+  color: var(--muted); font-size: 11px; border-radius: 5px; cursor: pointer;
+  font-family: var(--font-mono);
+}
+.seg-toggle button.on { background: var(--ink); color: var(--bg); }
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .section { padding: 64px 0; }
+  :root { --pad: 20px; }
+}
+
+</style>
+<style>
+
+  /* Unified page header */
+  .page-head,
+  .today-head,
+  .dash-head {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    flex-wrap: wrap; gap: 16px;
+    margin-bottom: 32px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .page-head .eyebrow,
+  .today-head .eyebrow,
+  .dash-head .eyebrow { margin-bottom: 10px; display: block; }
+  .page-head h1,
+  .today-head h1,
+  .dash-head h1 {
+    font-size: clamp(32px, 3.4vw, 40px);
+    letter-spacing: -0.025em; line-height: 1.1;
+    margin: 0;
+  }
+  .page-head p,
+  .today-head p,
+  .dash-head p {
+    color: var(--muted); font-size: 13px; margin: 6px 0 0;
+    font-family: var(--font-mono); letter-spacing: 0.02em;
+  }
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 40px var(--pad) 80px; }
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 48px var(--pad) 80px; }
+  .dash-head {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 28px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .dash-head .eyebrow { margin-bottom: 10px; }
+  .dash-head h1 { font-size: 34px; letter-spacing: -0.025em; }
+  .dash-head p { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+
+  .grid-charts { display: grid; grid-template-columns: 1.7fr 1fr; gap: 24px; }
+
+  .chart-panel {
+    border: 1px solid var(--line); border-radius: var(--radius-lg);
+    padding: 24px; background: var(--bg);
+  }
+  .chart-panel .hdr {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 14px;
+  }
+  .chart-panel .hdr .title { font-size: 16px; font-weight: 600; margin-top: 4px; }
+
+  .chart-svg { width: 100%; height: 220px; }
+  .ax-label {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 10px; color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .note-card {
+    padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--surface); margin-bottom: 14px;
+  }
+  .note-card .eyebrow { margin: 0 0 8px; }
+  .note-card p { margin: 0; font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+
+  .update-list {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 14px;
+  }
+  .update {
+    display: grid; grid-template-columns: auto 1fr auto;
+    gap: 12px; padding: 12px 0;
+    border-bottom: 1px solid var(--line-soft); align-items: center;
+  }
+  .update:last-child { border-bottom: none; }
+  .update .chipette { font-size: 10px; }
+  .update .label { font-size: 13px; }
+  .update .meta { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+
+  .advise {
+    padding: 20px 22px;
+    border: 1px solid var(--ink); border-radius: var(--radius-lg);
+    background: var(--ink); color: var(--bg);
+  }
+  .advise .eyebrow { color: color-mix(in oklab, var(--bg) 60%, transparent); margin-bottom: 8px; }
+  .advise p { margin: 4px 0 0; font-size: 14px; line-height: 1.55; }
+  html[data-theme="dark"] .advise { background: var(--surface-2); color: var(--ink); border-color: var(--line); }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-charts { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
-    <div class="header">
-        <a href="index.html">←</a>
-        <h1>👁️ 家长端 — 评估器</h1>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">
+      <span class="brand-mark" data-icon="harness"></span><span>Weight Harness</span>
+      <span class="brand-tag">PARENT</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">概览</a>
+      <a href="coach.html">教练</a>
+      <a href="student.html">学生</a>
+      <a href="parent.html" class="active">家长</a>
     </div>
-    <div class="container">
-        <!-- 状态概览 -->
-        <div class="overview">
-            <div class="overview-item">
-                <div class="value green">48.0</div>
-                <div class="label">今日体重(kg)</div>
-            </div>
-            <div class="overview-item">
-                <div class="value yellow">45天</div>
-                <div class="label">距离比赛</div>
-            </div>
-            <div class="overview-item">
-                <div class="value">-0.0</div>
-                <div class="label">较昨日(kg)</div>
-            </div>
-            <div class="overview-item">
-                <div class="value">6.0</div>
-                <div class="label">还需减(kg)</div>
-            </div>
-        </div>
-
-        <!-- 体重趋势 -->
-        <div class="card">
-            <h2>📈 体重趋势</h2>
-            <div class="chart-placeholder">
-                体重曲线图（接入数据后显示）
-            </div>
-        </div>
-
-        <!-- 今日执行情况 -->
-        <div class="card">
-            <h2>✅ 今日执行情况</h2>
-            <p style="font-size:14px; color:#888; margin-bottom:8px;">完成 0/7 项</p>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" style="width: 0%;"></div>
-            </div>
-
-            <div class="checkin-status">
-                <span class="dot dot-pending"></span>
-                <span class="checkin-text">晨跑 5km</span>
-                <span class="checkin-time">待完成</span>
-            </div>
-            <div class="checkin-status">
-                <span class="dot dot-pending"></span>
-                <span class="checkin-text">早餐打卡</span>
-                <span class="checkin-time">待完成</span>
-            </div>
-            <div class="checkin-status">
-                <span class="dot dot-pending"></span>
-                <span class="checkin-text">专项训练</span>
-                <span class="checkin-time">待完成</span>
-            </div>
-            <div class="checkin-status">
-                <span class="dot dot-pending"></span>
-                <span class="checkin-text">午餐打卡</span>
-                <span class="checkin-time">待完成</span>
-            </div>
-            <div class="checkin-status">
-                <span class="dot dot-pending"></span>
-                <span class="checkin-text">力量训练</span>
-                <span class="checkin-time">待完成</span>
-            </div>
-            <div class="checkin-status">
-                <span class="dot dot-pending"></span>
-                <span class="checkin-text">晚餐打卡</span>
-                <span class="checkin-time">待完成</span>
-            </div>
-            <div class="checkin-status">
-                <span class="dot dot-pending"></span>
-                <span class="checkin-text">睡前体重</span>
-                <span class="checkin-time">待完成</span>
-            </div>
-        </div>
-
-        <!-- 鼓励 -->
-        <div class="card">
-            <div class="encourage">
-                💚 孩子正在努力中<br>
-                您的关注是他最大的动力<br>
-                每一次打卡都值得一个鼓励
-            </div>
-        </div>
+    <div class="nav-right">
+      <span style="color:var(--ink)">李妈妈</span>
+      <a href="#" data-theme-toggle class="kbd" style="text-decoration:none">主题</a>
     </div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div class="dash-head">
+    <div>
+      <span class="eyebrow">PARENT · 进展概览</span>
+      <h1>一切按计划</h1>
+      <p>过去 30 天，孩子完成 167 项计划任务 · 你只需在异常时看一眼。</p>
+    </div>
+    <div style="display:flex; gap:12px; align-items:center">
+      <span class="seg"><span>7 天</span><span class="on">30 天</span><span>全程</span></span>
+      <span class="mono" style="font-size:11px; color:var(--muted)">更新 · 刚刚</span>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <span class="k-lbl">CURRENT WEIGHT</span>
+      <span class="k-val">60.8<small>kg</small></span>
+      <span class="k-delta">距目标 54.0 kg · 还差 6.8 kg</span>
+    </div>
+    <div class="kpi">
+      <span class="k-lbl">30D CHANGE</span>
+      <span class="k-val">−2.4<small>kg</small></span>
+      <span class="k-delta">▼ 符合预期区间</span>
+    </div>
+    <div class="kpi">
+      <span class="k-lbl">COMPLIANCE</span>
+      <span class="k-val">89<small>%</small></span>
+      <span class="k-delta">依从率 · 稳定</span>
+    </div>
+    <div class="kpi">
+      <span class="k-lbl">STATUS</span>
+      <span class="k-val">On Track</span>
+      <span class="k-delta">本周无需介入</span>
+    </div>
+  </div>
+
+  <div class="grid-charts">
+    <div class="chart-panel">
+      <div class="hdr">
+        <div>
+          <span class="eyebrow">WEIGHT CURVE · 近 30 天</span>
+          <div class="title">体重曲线</div>
+        </div>
+        <span class="mono" style="font-size:10px; color:var(--muted)">kg</span>
+      </div>
+      <svg class="chart-svg" viewBox="0 0 720 220" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="wgGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--ink)" stop-opacity="0.1"/>
+            <stop offset="100%" stop-color="var(--ink)" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <g stroke="var(--line-soft)" stroke-width="1">
+          <line x1="0" y1="40" x2="720" y2="40"/>
+          <line x1="0" y1="100" x2="720" y2="100"/>
+          <line x1="0" y1="160" x2="720" y2="160"/>
+        </g>
+        <line x1="0" y1="190" x2="720" y2="190" stroke="var(--muted)" stroke-dasharray="4 4" stroke-width="1"/>
+        <text x="715" y="184" text-anchor="end" font-family="SF Mono,Menlo,monospace" font-size="9" fill="var(--muted)">目标 54.0</text>
+
+        <path d="M0,50 L48,56 L96,62 L144,58 L192,68 L240,74 L288,78 L336,84 L384,88 L432,94 L480,100 L528,104 L576,110 L624,114 L672,118 L720,122 L720,220 L0,220 Z" fill="url(#wgGrad)"/>
+        <polyline fill="none" stroke="var(--ink)" stroke-width="1.75"
+          points="0,50 48,56 96,62 144,58 192,68 240,74 288,78 336,84 384,88 432,94 480,100 528,104 576,110 624,114 672,118 720,122"/>
+        <circle cx="720" cy="122" r="3.5" fill="var(--ink)"/>
+        <circle cx="720" cy="122" r="8" fill="var(--ink)" opacity="0.12"/>
+      </svg>
+      <div class="ax-label">
+        <span>3/21</span><span>3/28</span><span>4/04</span><span>4/11</span><span>4/18</span><span>今天</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="advise">
+        <span class="eyebrow">YOU · 这周可以做什么</span>
+        <p>不需要提醒，不需要催促。本周五 20:00 打开家长端查看小结即可。</p>
+      </div>
+
+      <h4 style="font-size:12px; font-family:var(--font-mono); color:var(--muted); letter-spacing:0.12em; text-transform:uppercase; margin:24px 0 10px">RECENT UPDATES</h4>
+      <div class="update-list">
+        <div class="update">
+          <span class="chipette">教练</span>
+          <span class="label">调整了本周有氧安排</span>
+          <span class="meta">2h ago</span>
+        </div>
+        <div class="update">
+          <span class="chipette">学生</span>
+          <span class="label">连续 3 天晨间打卡</span>
+          <span class="meta">today</span>
+        </div>
+        <div class="update">
+          <span class="chipette">系统</span>
+          <span class="label">已同步至小程序提醒</span>
+          <span class="meta">yesterday</span>
+        </div>
+        <div class="update">
+          <span class="chipette">教练</span>
+          <span class="label">发送本周阶段小结</span>
+          <span class="meta">3 days ago</span>
+        </div>
+      </div>
+
+      <div class="note-card">
+        <span class="eyebrow">YOUR NOTE</span>
+        <p>你在家长端的留言，学生与教练都能看到。保持简短和具体的鼓励。</p>
+        <a href="#" class="btn" style="margin-top:12px; font-size:12px; padding:8px 14px;">写一条鼓励 →</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="tweaks-panel" id="tweaks">
+  <h4>Tweaks</h4>
+  <div class="tweak-row">
+    <span>外观</span>
+    <span class="seg-toggle">
+      <button data-theme="light" class="on">浅色</button>
+      <button data-theme="dark">深色</button>
+    </span>
+  </div>
+</div>
+
+<script>
+// Shared SF Symbols-style line icons. 24x24 viewBox, 1.5 stroke.
+// Usage: <span class="iframe-ic" data-icon="coach"></span>
+//        hydrateIcons(root?)
+
+const ICONS = {
+  // Logo — harness/ribcage glyph
+  harness: `<path d="M6 4v16M18 4v16M6 9h12M6 15h12"/>`,
+
+  // Coach — brain / planning
+  coach: `<path d="M9 5a3 3 0 0 0-3 3 2.5 2.5 0 0 0-1.5 4.5A2.5 2.5 0 0 0 6 17a3 3 0 0 0 3 2h1.5V5Z"/><path d="M13.5 5a3 3 0 0 1 3 3 2.5 2.5 0 0 1 1.5 4.5A2.5 2.5 0 0 1 16.5 17a3 3 0 0 1-3 2H12V5Z"/>`,
+
+  // Student — dumbbell
+  student: `<path d="M4 10v4M20 10v4M7 7v10M17 7v10M9 11h6M9 13h6"/>`,
+
+  // Parent — eye
+  parent: `<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/>`,
+
+  // Chart / trend
+  chart: `<path d="M4 19V5M4 19h16M7 15l3-4 3 2 4-6"/>`,
+
+  // Check
+  check: `<path d="M5 12l4 4 10-10"/>`,
+
+  // Plus
+  plus: `<path d="M12 5v14M5 12h14"/>`,
+
+  // Bell (alert)
+  bell: `<path d="M6 15V10a6 6 0 0 1 12 0v5l1.5 2h-15zM10 19a2 2 0 0 0 4 0"/>`,
+
+  // Calendar
+  calendar: `<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>`,
+
+  // Clock
+  clock: `<circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/>`,
+
+  // Arrow right
+  arrowRight: `<path d="M5 12h14M13 6l6 6-6 6"/>`,
+
+  // Settings
+  gear: `<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>`,
+
+  // Scale
+  scale: `<path d="M5 20h14M7 20V9h10v11M9 9a3 3 0 0 1 6 0M10 13l4 4M14 13l-4 4"/>`,
+
+  // Message
+  message: `<path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-4 4v-4H6a2 2 0 0 1-2-2z"/>`,
+
+  // Search
+  search: `<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/>`,
+
+  // Food/plate
+  plate: `<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/>`,
+
+  // Run
+  run: `<circle cx="14" cy="5" r="2"/><path d="M8 12l3-3 3 2 2 4M6 19l3-4 2 2M15 14l3 1v4"/>`,
+
+  // Book / docs
+  book: `<path d="M5 5a2 2 0 0 1 2-2h11v16H7a2 2 0 0 0-2 2V5zM5 5v16"/>`,
+
+  // Triangle
+  triangle: `<path d="M12 4 L21 20 H3 Z"/>`,
+
+  // Sun / Moon
+  sun: `<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.5 5.5l1.5 1.5M17 17l1.5 1.5M5.5 18.5 7 17M17 7l1.5-1.5"/>`,
+  moon: `<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>`,
+
+  // Logout
+  logout: `<path d="M9 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4M15 8l4 4-4 4M11 12h8"/>`,
+
+  // Flow (for hero product ph)
+  flow: `<rect x="3" y="4" width="7" height="5" rx="1"/><rect x="14" y="4" width="7" height="5" rx="1"/><rect x="3" y="15" width="7" height="5" rx="1"/><rect x="14" y="15" width="7" height="5" rx="1"/><path d="M10 6.5h4M10 17.5h4M6.5 9v6M17.5 9v6"/>`,
+
+  // External / link
+  external: `<path d="M14 5h5v5M19 5 10 14M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5"/>`,
+};
+
+function iconSVG(name) {
+  const d = ICONS[name];
+  if (!d) return '';
+  return `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+}
+
+function hydrateIcons(root) {
+  (root || document).querySelectorAll('[data-icon]').forEach(el => {
+    const name = el.getAttribute('data-icon');
+    if (ICONS[name]) el.innerHTML = iconSVG(name);
+  });
+}
+
+window.ICONS = ICONS;
+window.iconSVG = iconSVG;
+window.hydrateIcons = hydrateIcons;
+document.addEventListener('DOMContentLoaded', () => hydrateIcons());
+
+</script>
+<script>
+// Weight Harness — shared app behavior
+// - Theme persistence & toggle
+// - Edit-mode (Tweaks) protocol
+// - Animated triangle (stroke-dash draw-in → 2-3 loop pulses → static)
+
+(function () {
+  const root = document.documentElement;
+  const saved = localStorage.getItem('wh-theme') || 'light';
+  root.setAttribute('data-theme', saved);
+
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    localStorage.setItem('wh-theme', t);
+    document.querySelectorAll('[data-theme-sync]').forEach(el => {
+      const mode = el.getAttribute('data-theme-sync');
+      if (mode === 'chip') el.textContent = t === 'dark' ? 'Light' : 'Dark';
+    });
+    document.querySelectorAll('.seg-toggle button[data-theme]').forEach(b => {
+      b.classList.toggle('on', b.dataset.theme === t);
+    });
+  }
+  applyTheme(saved);
+
+  document.addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-theme-toggle]');
+    if (chip) {
+      const cur = root.getAttribute('data-theme');
+      applyTheme(cur === 'dark' ? 'light' : 'dark');
+      try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { theme: root.getAttribute('data-theme') } }, '*'); } catch(e) {}
+    }
+    const seg = e.target.closest('.seg-toggle button[data-theme]');
+    if (seg) {
+      applyTheme(seg.dataset.theme);
+      try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { theme: seg.dataset.theme } }, '*'); } catch(e) {}
+    }
+  });
+
+  // Tweaks panel
+  const panel = document.getElementById('tweaks');
+  window.addEventListener('message', (e) => {
+    const d = e.data || {};
+    if (d.type === '__activate_edit_mode' && panel) panel.classList.add('on');
+    if (d.type === '__deactivate_edit_mode' && panel) panel.classList.remove('on');
+  });
+  try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch (e) {}
+})();
+
+
+/* ============================================
+   Animated triangle — draw-in then loop-pulse
+   ============================================ */
+window.initTriangle = function initTriangle(rootEl) {
+  if (!rootEl || rootEl.dataset.init === '1') return;
+  rootEl.dataset.init = '1';
+
+  const paths = rootEl.querySelectorAll('.tri-edge');
+  const nodes = rootEl.querySelectorAll('.tri-node');
+  const labels = rootEl.querySelectorAll('.tri-label');
+  const pulses = rootEl.querySelectorAll('.tri-pulse');
+  const nodeLabels = rootEl.querySelectorAll('.tri-node-label');
+
+  // pre-set stroke dash
+  paths.forEach((p) => {
+    const len = p.getTotalLength();
+    p.style.strokeDasharray = len;
+    p.style.strokeDashoffset = len;
+    p.dataset.len = len;
+  });
+  nodes.forEach(n => n.classList.add('tri-node-hidden'));
+  labels.forEach(l => l.classList.add('tri-label-hidden'));
+  nodeLabels.forEach(l => l.classList.add('tri-label-hidden'));
+  pulses.forEach(p => p.style.opacity = 0);
+
+  function drawIn() {
+    // Draw each edge sequentially over ~6s total
+    const dur = 1800; // per edge
+    paths.forEach((p, i) => {
+      setTimeout(() => {
+        p.style.transition = `stroke-dashoffset ${dur}ms cubic-bezier(0.45,0,0.15,1)`;
+        p.style.strokeDashoffset = 0;
+      }, i * dur);
+    });
+
+    // Reveal nodes staggered with edges
+    nodes.forEach((n, i) => {
+      setTimeout(() => n.classList.remove('tri-node-hidden'), 200 + i * dur);
+    });
+    nodeLabels.forEach((l, i) => {
+      setTimeout(() => l.classList.remove('tri-label-hidden'), 500 + i * dur);
+    });
+
+    // Reveal edge labels after draw
+    setTimeout(() => {
+      labels.forEach((l, i) => {
+        setTimeout(() => l.classList.remove('tri-label-hidden'), i * 120);
+      });
+    }, paths.length * dur);
+
+    // Start pulses
+    setTimeout(startPulse, paths.length * dur + 400);
+  }
+
+  let pulseCount = 0;
+  const maxPulses = 3;
+
+  function startPulse() {
+    if (pulseCount >= maxPulses) {
+      // Rest state: make edges solid, hide pulses, re-highlight labels
+      pulses.forEach(p => { p.style.opacity = 0; });
+      rootEl.classList.add('tri-rest');
+      return;
+    }
+    pulseCount++;
+    // Each pulse travels around 3 edges (coach → student → parent → coach)
+    pulses.forEach((pulseEl, edgeIdx) => {
+      const edge = paths[edgeIdx];
+      const total = +edge.dataset.len;
+      const dur = 1200;
+      const delay = edgeIdx * dur;
+
+      setTimeout(() => {
+        const start = performance.now();
+        pulseEl.style.opacity = 1;
+        function step(t) {
+          const p = Math.min(1, (t - start) / dur);
+          const pt = edge.getPointAtLength(p * total);
+          pulseEl.setAttribute('cx', pt.x);
+          pulseEl.setAttribute('cy', pt.y);
+
+          // Highlight associated label when pulse is in its window
+          const lbl = labels[edgeIdx];
+          if (lbl) {
+            if (p > 0.25 && p < 0.75) lbl.classList.add('tri-label-hot');
+            else lbl.classList.remove('tri-label-hot');
+          }
+
+          if (p < 1) requestAnimationFrame(step);
+          else {
+            pulseEl.style.opacity = 0;
+            if (lbl) lbl.classList.remove('tri-label-hot');
+            // When final pulse of this loop finishes, schedule next loop
+            if (edgeIdx === pulses.length - 1) {
+              setTimeout(startPulse, 300);
+            }
+          }
+        }
+        requestAnimationFrame(step);
+      }, delay);
+    });
+  }
+
+  // Trigger on scroll into view
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        drawIn();
+        io.disconnect();
+      }
+    });
+  }, { threshold: 0.35 });
+  io.observe(rootEl);
+
+  // Click to replay
+  rootEl.addEventListener('click', () => {
+    if (!rootEl.classList.contains('tri-rest')) return;
+    rootEl.classList.remove('tri-rest');
+    pulseCount = 0;
+    // reset and redraw
+    paths.forEach(p => { p.style.transition = 'none'; p.style.strokeDashoffset = p.dataset.len; });
+    nodes.forEach(n => n.classList.add('tri-node-hidden'));
+    labels.forEach(l => { l.classList.add('tri-label-hidden'); l.classList.remove('tri-label-hot'); });
+    nodeLabels.forEach(l => l.classList.add('tri-label-hidden'));
+    // force reflow
+    void rootEl.offsetWidth;
+    drawIn();
+  });
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-triangle]').forEach(el => window.initTriangle(el));
+});
+
+</script>
 </body>
 </html>
